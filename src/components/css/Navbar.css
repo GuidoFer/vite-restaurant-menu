@@ -1,0 +1,41 @@
+/* src/components/css/Navbar.css */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--color-text-dark); /* Color oscuro para contraste */
+    color: var(--color-text-light);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-logo {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-logo span {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+
+.navbar-logo h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.navbar-info small {
+    font-size: 0.75rem;
+    color: var(--color-border);
+}
+
+/* Media Query: Desktop */
+@media (min-width: 768px) {
+    .navbar-logo h1 {
+        font-size: 1.5rem;
+    }
+}

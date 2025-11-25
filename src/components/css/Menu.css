@@ -1,0 +1,119 @@
+/* src/components/css/Menu.css */
+.menu-container {
+    padding: 20px 10px;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    flex-grow: 1; /* Permite que el contenido se estire */
+}
+
+.menu-category {
+    margin-bottom: 30px;
+}
+
+.menu-category h2 {
+    font-size: 1.8rem;
+    color: var(--color-primary);
+    border-bottom: 3px solid var(--color-primary);
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.menu-items-list {
+    display: grid;
+    gap: 15px;
+}
+
+/* Estilo Mobile-First (Base: Una columna) */
+.menu-item {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.2s;
+    min-height: 100px;
+}
+
+.menu-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.item-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    flex-shrink: 0; /* No permite que la imagen se reduzca */
+    background-color: var(--color-background);
+}
+
+.item-image.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-border);
+}
+
+.item-details {
+    padding: 10px 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.item-name {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+.item-price {
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+/* Estilo para platos AGOTADOS */
+.menu-item.unavailable {
+    opacity: 0.6;
+}
+.menu-item.unavailable .availability-tag {
+    display: inline-block;
+    background-color: var(--color-error);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* Opciones del Día */
+.options-section h3 {
+    font-size: 1rem;
+    color: var(--color-text-dark);
+    margin-top: 10px;
+}
+.options-section p {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Media Query: Tablet/Desktop (Dos columnas para Platos) */
+@media (min-width: 600px) {
+    .menu-items-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    /* En desktop, la imagen debe ser más pequeña para ahorrar espacio */
+    .menu-item {
+        flex-direction: row; /* Mantener la disposición horizontal */
+    }
+}
