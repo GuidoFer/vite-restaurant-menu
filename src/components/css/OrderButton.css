@@ -1,0 +1,30 @@
+/* src/components/css/OrderButton.css */
+
+.order-button-floating {
+    /* Clases de posicionamiento y estilo */
+    position: fixed;
+    bottom: 20px; /* Separación del fondo */
+    right: 20px; /* Separación de la derecha */
+    
+    /* Estilo del botón */
+    background-color: #25d366; /* Color de WhatsApp */
+    color: white;
+    padding: 15px 25px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    z-index: 1000; /* Asegura que esté sobre otros elementos */
+    transition: background-color 0.3s ease;
+    
+    /* Diseño responsivo (opcional) */
+    display: flex;
+    align-items: center;
+}
+
+.order-button-floating:hover {
+    background-color: #128c7e;
+}
+
+/* Si tu CSS anterior tenía la clase .Whatsapp-Button, reemplázala por .order-button-floating */

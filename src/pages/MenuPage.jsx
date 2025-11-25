@@ -1,64 +1,54 @@
-// src/pages/MenuPage.jsx
+// src/pages/MenuPage.jsx (AJUSTADO)
 import React from 'react';
-import { useMenuData } from '../hooks/useMenuData';
-import Menu from '../components/Menu';
+import { useParams } from 'react-router-dom';
+import useMenuData from '../hooks/useMenuData';
 import Navbar from '../components/Navbar';
-import WhatsappButton from '../components/WhatsappButton';
-import NotFound from './NotFound';
-
+import Hero from '../components/Hero';
+import Menu from '../components/Menu';
+import OpcionesList from '../components/OpcionesList';
+import Footer from '../components/Footer';
+import OrderButton from '../components/OrderButton';
+import PaymentModal from '../components/PaymentModal';
 
 function MenuPage() {
-    
-    // Extracción de slug más robusta para producción:
-    // Debe funcionar tanto para /demo-restaurant/ como para /demo-restaurant
-    const urlParts = window.location.pathname.split('/').filter(part => part !== '');
-    const slug = urlParts[urlParts.length - 1];
-
-    // Obtener el estado del hook
+    const { slug } = useParams();
     const { data, loading, error } = useMenuData(slug);
 
-    // Si no hay slug en la URL (ej: solo localhost:5173), redirige al 404
-    if (!slug) {
-        return <NotFound message="🛑 Ruta Incompleta" />;
+    if (loading) {
+        return <div className="loading-screen">Cargando menú...</div>;
     }
 
-    // --- FLUJO DE RENDERIZADO FINAL ---
+    if (error) {
+        return <div className="error-screen">Error: {error}</div>;
+    }
+
+    if (!data || !data.restaurant) {
+        return <div className="error-screen">No se pudo cargar la información del restaurante.</div>;
+    }
+
+    const { restaurant, categories, opciones, lastUpdate } = data;
 
     return (
         <div className="menu-page">
+            <Navbar 
+                restaurantName={restaurant.nombre} 
+                lastUpdate={lastUpdate} 
+            />
+            <Hero 
+                restaurantName={restaurant.nombre} 
+            />
             
-            {/* 1. Muestra LOADING mientras se carga, y solo si no hay datos previos */}
-            {loading && !data && (
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>Cargando menú...</p>
-                </div>
-            )}
-            
-            {/* 2. Muestra ERROR si NO hay datos y NO está cargando. */}
-            {error && !loading && !data && (
-                <NotFound message={error} />
-            )}
+            <div className="main-content">
+                {/* Bug 3: Pasamos la nueva propiedad 'categories' */}
+                <Menu categories={categories} /> 
+                <OpcionesList opciones={opciones} />
+            </div>
 
-            {/* 3. Muestra el CONTENIDO DEL MENÚ si hay datos. */}
-            {data && (
-                <>
-                    {/* Navbar */}
-                    <Navbar
-                        // CORRECCIÓN 1: Usar 'nombre' en lugar de 'name'
-                        restaurantName={data.restaurant.nombre} 
-                        // CORRECCIÓN 2: Mover 'lastUpdate' a la raíz del objeto 'data'
-                        lastUpdate={data.lastUpdate} 
-                    />
-                    
-                    {/* Menu */}
-                    <Menu menu={data.menu} optionsList={data.optionsList} />
-
-                    {/* WhatsApp */}
-                    <WhatsappButton number={data.restaurant.telefono} /> 
-                </>
-            )}
-
+            <Footer />
+            {/* Componentes Flotantes */}
+            <OrderButton phoneNumber={restaurant.telefono} />
+            {/* Bug 4: Pasamos qr_url al PaymentModal */}
+            <PaymentModal qrUrl={restaurant.qr_url} /> 
         </div>
     );
 }

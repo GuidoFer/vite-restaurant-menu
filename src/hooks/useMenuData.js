@@ -1,18 +1,20 @@
-// src/hooks/useMenuData.js
+// src/hooks/useMenuData.js (CÓDIGO FINAL Y CORREGIDO)
 import { useState, useEffect, useCallback } from 'react';
 import { getRestaurantData } from '../services/sheetsApi';
 
 /**
  * Custom Hook para gestionar el estado de la aplicación y la auto-actualización.
  */
-export function useMenuData(slug) {
+// CORRECCIÓN CLAVE: Exportamos la función como DEFAULT
+function useMenuData(slug) {
+    // Inicializamos con null para que el if (!data) de la TAREA 28 funcione correctamente.
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
     // TAREA 28: Implementación de Política de Retención de Datos
     const fetchData = useCallback(async () => {
-        // 1. Mostrar loading solo si NO hay datos previos (carga inicial)
+        // Mostrar loading solo si NO hay datos previos (carga inicial)
         if (!data) {
             setLoading(true);
             setError(null);
@@ -30,7 +32,6 @@ export function useMenuData(slug) {
                     setData(null);
                 } else {
                     // Si hay datos previos (refresh fallido), NO los borramos.
-                    // Esto evita el "Error de conexión" visible y el crash.
                     console.error("Refresh fallido. Mostrando datos antiguos.");
                 }
                 
@@ -61,7 +62,6 @@ export function useMenuData(slug) {
 
 
     // 1. useEffect: Carga Inicial
-    // TAREA 47: Dependencia estabilizada.
     useEffect(() => {
         if (slug) {
             fetchData();
@@ -87,3 +87,6 @@ export function useMenuData(slug) {
         lastUpdate: data?.lastUpdate
     };
 }
+
+// CORRECCIÓN CLAVE: Exportación por defecto para la importación en MenuPage.jsx
+export default useMenuData;
