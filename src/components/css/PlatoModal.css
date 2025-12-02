@@ -1,0 +1,195 @@
+/* src/components/css/PlatoModal.css - COMPLETO CORREGIDO */
+.plato-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.plato-modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.modal-close:hover {
+    background: #cc0000;
+}
+
+.plato-modal-content h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1.8rem;
+}
+
+.modal-plato-imagen {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.modal-precio {
+    font-size: 1.5rem;
+    color: #f5576c;
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.modal-guarniciones {
+    margin: 25px 0;
+}
+
+.modal-guarniciones h4 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.guarniciones-radio {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.radio-label span {
+    color: #333;
+    font-weight: 500;
+}
+
+.radio-label:hover {
+    border-color: #4CAF50;
+    background: #f0f9f0;
+}
+
+.radio-label input[type="radio"] {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.radio-label input[type="radio"]:checked ~ span {
+    font-weight: 600;
+    color: #4CAF50;
+}
+
+.modal-cantidad {
+    margin: 25px 0;
+}
+
+.modal-cantidad h4 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.cantidad-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    justify-content: center;
+}
+
+.cantidad-controls button {
+    width: 45px;
+    height: 45px;
+    border: 2px solid #4CAF50;
+    background: white;
+    color: #4CAF50;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cantidad-controls button:hover {
+    background: #4CAF50;
+    color: white;
+}
+
+.cantidad-controls span {
+    font-size: 1.5rem;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: center;
+    color: #333;
+}
+
+.modal-add-button {
+    width: 100%;
+    padding: 15px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.modal-add-button:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+@media (max-width: 768px) {
+    .plato-modal-content {
+        padding: 20px;
+    }
+
+    .modal-plato-imagen {
+        height: 200px;
+    }
+
+    .plato-modal-content h2 {
+        font-size: 1.5rem;
+    }
+}

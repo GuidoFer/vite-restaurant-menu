@@ -1,0 +1,77 @@
+/* src/components/css/CarritoButton.css */
+.carrito-floating-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    transition: all 0.3s ease;
+    z-index: 999;
+    font-size: 1rem;
+}
+
+.carrito-floating-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.5);
+}
+
+.carrito-icon {
+    position: relative;
+    font-size: 1.8rem;
+}
+
+.carrito-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff4444;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.carrito-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.carrito-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.carrito-total {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .carrito-floating-button {
+        bottom: 15px;
+        right: 15px;
+        padding: 12px 20px;
+    }
+
+    .carrito-icon {
+        font-size: 1.5rem;
+    }
+
+    .carrito-info {
+        font-size: 0.85rem;
+    }
+}
