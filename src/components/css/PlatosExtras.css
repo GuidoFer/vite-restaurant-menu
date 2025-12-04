@@ -10,7 +10,7 @@
 
 .accordion-header {
     width: 100%;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #EC4899 0%, #DB2777 100%);
     color: white;
     padding: 20px;
     border: none;
@@ -23,7 +23,7 @@
 }
 
 .accordion-header:hover {
-    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+    background: linear-gradient(135deg, #DB2777 0%, #EC4899 100%);
 }
 
 .accordion-header h2 {
@@ -66,7 +66,7 @@
     font-size: 1.3rem;
     margin-bottom: 15px;
     padding-bottom: 10px;
-    border-bottom: 2px solid #f5576c;
+    border-bottom: 2px solid #EC4899;
 }
 
 .platos-list {
@@ -84,8 +84,6 @@
     gap: 12px;
     transition: all 0.3s ease;
 }
-
-/* Agrega estos estilos DESPUÉS de .plato-extra-item */
 
 .plato-imagen-container {
     position: relative;
@@ -141,7 +139,7 @@
 
 .plato-precio {
     font-size: 1.2rem;
-    color: #f5576c;
+    color: #EC4899;
     font-weight: bold;
     margin: 0;
 }
@@ -168,7 +166,7 @@
     padding: 8px 16px;
     border: 2px solid #ddd;
     background: white;
-    color: #333; /* ⬅️ CRÍTICO: Color del texto */
+    color: #333;
     border-radius: 20px;
     cursor: pointer;
     font-size: 0.9rem;
@@ -177,22 +175,22 @@
 }
 
 .guarnicion-buttons button:hover {
-    border-color: #667eea;
-    background: #f0f4ff;
-    color: #667eea;
+    border-color: #EC4899;
+    background: #FDF2F8;
+    color: #EC4899;
 }
 
 .guarnicion-buttons button.selected {
-    border-color: #22c55e;
-    background: #22c55e;
-    color: white; /* ⬅️ Blanco cuando está seleccionado */
+    border-color: #EC4899;
+    background: #EC4899;
+    color: white;
     font-weight: bold;
 }
 
 .add-plato-btn {
     width: 100%;
     padding: 12px;
-    background: #667eea;
+    background: #EC4899;
     color: white;
     border: none;
     border-radius: 8px;
@@ -203,9 +201,9 @@
 }
 
 .add-plato-btn:hover:not(:disabled) {
-    background: #5a67d8;
+    background: #DB2777;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
 }
 
 .add-plato-btn:disabled {
@@ -221,4 +219,43 @@
         align-items: flex-start;
         gap: 8px;
     }
+}
+
+.accordion-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.accordion-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+    .accordion-text {
+        font-size: 0.8rem;
+    }
+}
+
+/* TEMA NOCHE - Color Azul/Morado */
+.platos-extras-container.noche-theme .accordion-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.platos-extras-container.noche-theme .accordion-header:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.platos-extras-container.noche-theme .categoria-titulo {
+    border-bottom-color: #667eea;
+}
+
+.platos-extras-container.noche-theme .add-plato-btn {
+    background: #667eea;
+}
+
+.platos-extras-container.noche-theme .add-plato-btn:hover:not(:disabled) {
+    background: #5568d3;
 }

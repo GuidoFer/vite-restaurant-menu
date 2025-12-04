@@ -1,47 +1,70 @@
 /* src/components/css/CarritoButton.css */
 .carrito-floating-button {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 25px;
+    right: 25px;
     background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
     color: white;
     border: none;
-    border-radius: 50px;
-    padding: 15px 25px;
+    border-radius: 60px;
+    padding: 20px 30px; /* Aumentado */
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 18px;
     cursor: pointer;
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.5);
     transition: all 0.3s ease;
     z-index: 999;
-    font-size: 1rem;
+    font-size: 1.1rem; /* Aumentado */
+    animation: pulse 2s infinite; /* ANIMACIÓN */
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.5);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(76, 175, 80, 0.7);
+    }
 }
 
 .carrito-floating-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.5);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 35px rgba(76, 175, 80, 0.6);
+    animation: none; /* Detener animación al hover */
 }
 
 .carrito-icon {
     position: relative;
-    font-size: 1.8rem;
+    font-size: 2.2rem; /* Aumentado */
 }
 
 .carrito-badge {
     position: absolute;
-    top: -8px;
-    right: -8px;
+    top: -10px;
+    right: -10px;
     background: #ff4444;
     color: white;
     border-radius: 50%;
-    width: 22px;
-    height: 22px;
+    width: 26px; /* Aumentado */
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.85rem; /* Aumentado */
     font-weight: bold;
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
 }
 
 .carrito-info {
@@ -51,27 +74,38 @@
 }
 
 .carrito-text {
-    font-size: 0.9rem;
+    font-size: 1rem; /* Aumentado */
     font-weight: 600;
 }
 
 .carrito-total {
-    font-size: 1.1rem;
+    font-size: 1.3rem; /* Aumentado */
     font-weight: bold;
 }
 
 @media (max-width: 768px) {
     .carrito-floating-button {
-        bottom: 15px;
-        right: 15px;
-        padding: 12px 20px;
+        bottom: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        font-size: 1rem;
     }
 
     .carrito-icon {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
     }
 
-    .carrito-info {
-        font-size: 0.85rem;
+    .carrito-badge {
+        width: 24px;
+        height: 24px;
+        font-size: 0.75rem;
+    }
+
+    .carrito-text {
+        font-size: 0.9rem;
+    }
+
+    .carrito-total {
+        font-size: 1.1rem;
     }
 }

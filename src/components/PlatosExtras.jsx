@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import PlatoModal from './PlatoModal';
 import './css/PlatosExtras.css';
 
-const PlatosExtras = ({ menuExtras, horarioActual, onAddToCart, guarniciones }) => {
+const PlatosExtras = ({ menuExtras, horarioActual, onAddToCart, guarniciones, theme = 'dia' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [platoSeleccionado, setPlatoSeleccionado] = useState(null);
 
@@ -15,9 +15,10 @@ const PlatosExtras = ({ menuExtras, horarioActual, onAddToCart, guarniciones }) 
         return null;
     }
 
-    const titulo = horarioActual === 'medio_dia' 
-        ? '🍽️ Platos Extras - Medio Día' 
-        : '🌙 Platos Extras - Noche';
+    // Títulos según tema
+    const titulo = theme === 'noche' 
+        ? '🌙 Nuestro Menú - Noche' 
+        : '🍽️ Platos Extras - Medio Día';
 
     const handleOpenModal = (plato) => {
         setPlatoSeleccionado(plato);
@@ -29,13 +30,16 @@ const PlatosExtras = ({ menuExtras, horarioActual, onAddToCart, guarniciones }) 
 
     return (
         <>
-            <div className="platos-extras-container">
+            <div className={`platos-extras-container ${theme === 'noche' ? 'noche-theme' : ''}`}>
                 <button 
                     className={`accordion-header ${isOpen ? 'active' : ''}`}
                     onClick={toggleAccordion}
                 >
                     <h2>{titulo}</h2>
-                    <span className="accordion-icon">{isOpen ? '▼' : '▶'}</span>
+                    <div className="accordion-action">
+                        <span className="accordion-text">{isOpen ? 'Ocultar Menú' : 'Mostrar Menú'}</span>
+                        <span className="accordion-icon">{isOpen ? '▼' : '▶'}</span>
+                    </div>
                 </button>
 
                 {isOpen && (

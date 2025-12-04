@@ -33,8 +33,23 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
     };
 
     const handleConfirmarPedido = () => {
-        if (!formData.nombre.trim() || !formData.celular.trim()) {
-            alert('Por favor completa tu nombre y celular');
+        // Validar nombre
+        if (!formData.nombre.trim()) {
+            alert('Por favor ingresa tu nombre completo');
+            return;
+        }
+
+        // Validar celular boliviano: debe empezar con 6 o 7 y tener 8 dígitos
+        const celularRegex = /^[67]\d{7}$/;
+        const celularLimpio = formData.celular.trim();
+
+        if (!celularLimpio) {
+            alert('Por favor ingresa tu número de celular');
+            return;
+        }
+
+        if (!celularRegex.test(celularLimpio)) {
+            alert('Número de celular inválido. Debe ser un número boliviano de 8 dígitos que empiece con 6 o 7.\nEjemplo: 70123456 o 60123456');
             return;
         }
 
@@ -42,16 +57,32 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
         setMostrarPago(true);
     };
 
+    // Generar número de pedido único: YYYYMMDD-HHMM-XXX
+    const generarNumeroPedido = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const random = String(Math.floor(Math.random() * 999) + 1).padStart(3, '0');
+        
+        return `${year}${month}${day}-${hours}${minutes}-${random}`;
+    };
+
     const generarMensajeWhatsApp = () => {
+        const numeroPedido = generarNumeroPedido();
+        
         let mensaje = `*🍽️ NUEVO PEDIDO - ${restaurante.nombre}*\n\n`;
-        mensaje += `*Cliente:* ${formData.nombre}\n`;
-        mensaje += `*Celular:* ${formData.celular}\n\n`;
+        mensaje += `*📋 Nº Pedido:* ${numeroPedido}\n`;
+        mensaje += `*👤 Cliente:* ${formData.nombre}\n`;
+        mensaje += `*📱 Celular:* ${formData.celular}\n\n`;
         mensaje += `*PEDIDO:*\n`;
         
         carrito.forEach((item, i) => {
             mensaje += `${i + 1}. ${item.nombre} x${item.cantidad || 1}\n`;
             if (item.guarnicion) {
-                mensaje += `   Guarnición: ${item.guarnicion}\n`;
+                mensaje += `   🍚 Guarnición: ${item.guarnicion}\n`;
             }
             if (item.detalles) {
                 mensaje += `   ${item.detalles}\n`;
@@ -60,11 +91,11 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
         });
 
         if (formData.notasAdicionales) {
-            mensaje += `*Notas:* ${formData.notasAdicionales}\n\n`;
+            mensaje += `*📝 Notas:* ${formData.notasAdicionales}\n\n`;
         }
 
-        mensaje += `*TOTAL: Bs. ${totalPrecio.toFixed(2)}*\n`;
-        mensaje += `*Tiempo estimado: ${tiempoEstimado} minutos*`;
+        mensaje += `*💰 TOTAL: Bs. ${totalPrecio.toFixed(2)}*\n`;
+        mensaje += `*⏱️ Tiempo estimado: ${tiempoEstimado} minutos*`;
 
         return encodeURIComponent(mensaje);
     };
@@ -169,7 +200,8 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                                     name="celular"
                                     value={formData.celular}
                                     onChange={handleInputChange}
-                                    placeholder="Ej: 70123456"
+                                    placeholder="Ej: 70123456 (sin 591)"
+                                    maxLength="8"
                                     required
                                 />
                             </div>

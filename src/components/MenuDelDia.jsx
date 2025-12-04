@@ -68,7 +68,10 @@ const MenuDelDia = ({ menu, presas, guarniciones, onAddToOrder }) => {
                 onClick={toggleAccordion}
             >
                 <h2>🍽️ Menú del Almuerzo</h2>
-                <span className="accordion-icon">{isOpen ? '▼' : '▶'}</span>
+                <div className="accordion-action">
+                    <span className="accordion-text">{isOpen ? 'Ocultar Menú' : 'Mostrar Menú'}</span>
+                    <span className="accordion-icon">{isOpen ? '▼' : '▶'}</span>
+                </div>
             </button>
 
             {isOpen && (
@@ -119,13 +122,13 @@ const MenuDelDia = ({ menu, presas, guarniciones, onAddToOrder }) => {
                                 className={tipoOrden === 'sopa' ? 'selected' : ''}
                                 onClick={() => setTipoOrden('sopa')}
                             >
-                                Sopa Suelta - Bs. {menu.precios?.sopa_suelta || 7}
+                                Solo Sopa Suelta - Bs. {menu.precios?.sopa_suelta || 7}
                             </button>
                             <button 
                                 className={tipoOrden === 'segundo' ? 'selected' : ''}
                                 onClick={() => setTipoOrden('segundo')}
                             >
-                                Segundo Suelto - Bs. {menu.precios?.segundo_suelto || 12}
+                                Solo Segundo Suelto - Bs. {menu.precios?.segundo_suelto || 12}
                             </button>
                         </div>
                     </div>
