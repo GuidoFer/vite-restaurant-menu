@@ -138,17 +138,24 @@ const MenuPage = () => {
             }
 
             // PRIORIDAD 3: Verificar si hay modales internos abiertos
-            // (Los modales de AlmuerzoModal y PlatoModal se manejan dentro de los componentes)
-            // Aquí verificamos si hay acordeones abiertos
+            // (AlmuerzoModal, PlatoModal - estos manejan su propio popstate)
+            // Detectar si hay algún overlay de modal visible en el DOM
+            const hayModalAbierto = document.querySelector('.almuerzo-modal-overlay, .plato-modal-overlay');
+            
+            if (hayModalAbierto) {
+                // Si hay un modal abierto, NO hacer nada aquí
+                // El modal se encargará de cerrarse con su propio listener
+                return;
+            }
 
-            // Verificar si algún acordeón está abierto
+            // PRIORIDAD 4: Verificar si algún acordeón está abierto
             const menuDelDiaAbierto = menuDelDiaRef.current?.isOpen;
             const platosExtrasDiaAbierto = platosExtrasDiaRef.current?.isOpen;
             const platosExtrasNocheAbierto = platosExtrasNocheRef.current?.isOpen;
 
             const hayAcordeones = menuDelDiaAbierto || platosExtrasDiaAbierto || platosExtrasNocheAbierto;
 
-            // PRIORIDAD 4: Si hay acordeones abiertos, cerrarlos todos
+            // Si hay acordeones abiertos, cerrarlos todos
             if (hayAcordeones) {
                 if (menuDelDiaRef.current?.closeAccordion) {
                     menuDelDiaRef.current.closeAccordion();
