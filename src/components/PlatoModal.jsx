@@ -1,10 +1,28 @@
 // src/components/PlatoModal.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './css/PlatoModal.css';
 
 const PlatoModal = ({ plato, guarniciones, onClose, onAddToCart }) => {
     const [cantidad, setCantidad] = useState(1);
     const [guarnicionSeleccionada, setGuarnicionSeleccionada] = useState('');
+
+    // Manejar botón atrás cuando el modal está abierto
+    useEffect(() => {
+        if (!plato) return;
+
+        const handleBackButton = (e) => {
+            e.preventDefault();
+            onClose();
+        };
+
+        // Agregar entrada al historial cuando se abre el modal
+        window.history.pushState({ modal: 'plato' }, '');
+        window.addEventListener('popstate', handleBackButton);
+
+        return () => {
+            window.removeEventListener('popstate', handleBackButton);
+        };
+    }, [plato, onClose]);
 
     if (!plato) return null;
 
@@ -43,9 +61,9 @@ const PlatoModal = ({ plato, guarniciones, onClose, onAddToCart }) => {
                 {plato.foto_url && (
                     <img src={plato.foto_url} alt={plato.nombre} className="modal-plato-imagen" />
                 )}
-
+                
                 <p className="modal-precio">Bs. {precio.toFixed(2)}</p>
-
+                
                 {necesitaGuarnicion && guarniciones && guarniciones.length > 0 && (
                     <div className="modal-guarniciones">
                         <h4>Selecciona Guarnición:</h4>
@@ -68,7 +86,7 @@ const PlatoModal = ({ plato, guarniciones, onClose, onAddToCart }) => {
                         </div>
                     </div>
                 )}
-
+                
                 <div className="modal-cantidad">
                     <h4>Cantidad:</h4>
                     <div className="cantidad-controls">
@@ -77,7 +95,7 @@ const PlatoModal = ({ plato, guarniciones, onClose, onAddToCart }) => {
                         <button onClick={incrementar}>+</button>
                     </div>
                 </div>
-
+                
                 <button className="modal-add-button" onClick={handleAdd}>
                     Agregar al Carrito - Bs. {total.toFixed(2)}
                 </button>

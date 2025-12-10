@@ -1,5 +1,5 @@
 // src/components/OrderSummary.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PaymentModal from './PaymentModal';
 import './css/OrderSummary.css';
 
@@ -12,6 +12,30 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
         celular: '',
         notasAdicionales: ''
     });
+
+    // Manejar botón atrás cuando el modal está abierto
+    useEffect(() => {
+        const handleBackButton = (e) => {
+            e.preventDefault();
+            
+            // Si está en la pantalla de pago, volver al formulario
+            if (mostrarPago) {
+                setMostrarPago(false);
+                setMostrarFormulario(true);
+            } else {
+                // Si está en el formulario, cerrar el modal
+                onClose();
+            }
+        };
+
+        // Agregar entrada al historial cuando se abre el modal
+        window.history.pushState({ modal: 'orderSummary' }, '');
+        window.addEventListener('popstate', handleBackButton);
+
+        return () => {
+            window.removeEventListener('popstate', handleBackButton);
+        };
+    }, [mostrarPago, onClose]);
 
     // Calcular totales
     const totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);

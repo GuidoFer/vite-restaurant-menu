@@ -1,11 +1,29 @@
 // src/components/AlmuerzoModal.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './css/AlmuerzoModal.css';
 
 const AlmuerzoModal = ({ isOpen, onClose, tipo, menu, guarniciones, onAddToOrder }) => {
     const [segundoSeleccionado, setSegundoSeleccionado] = useState('');
     const [guarnicionSeleccionada, setGuarnicionSeleccionada] = useState('');
     const [cantidad, setCantidad] = useState(1);
+
+    // Manejar botón atrás cuando el modal está abierto
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleBackButton = (e) => {
+            e.preventDefault();
+            handleClose();
+        };
+
+        // Agregar entrada al historial cuando se abre el modal
+        window.history.pushState({ modal: 'almuerzo' }, '');
+        window.addEventListener('popstate', handleBackButton);
+
+        return () => {
+            window.removeEventListener('popstate', handleBackButton);
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
