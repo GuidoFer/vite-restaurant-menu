@@ -1,11 +1,18 @@
 // src/components/PlatosExtras.jsx
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import PlatoModal from './PlatoModal';
 import './css/PlatosExtras.css';
 
-const PlatosExtras = ({ menuExtras, horarioActual, onAddToCart, guarniciones, theme = 'dia' }) => {
+const PlatosExtras = forwardRef(({ menuExtras, horarioActual, onAddToCart, guarniciones, theme = 'dia' }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [platoSeleccionado, setPlatoSeleccionado] = useState(null);
+
+    // Exponer funciones al componente padre mediante ref
+    useImperativeHandle(ref, () => ({
+        isOpen: isOpen,
+        closeAccordion: () => setIsOpen(false),
+        openAccordion: () => setIsOpen(true)
+    }));
 
     const toggleAccordion = () => setIsOpen(!isOpen);
 
@@ -105,6 +112,8 @@ const PlatosExtras = ({ menuExtras, horarioActual, onAddToCart, guarniciones, th
             )}
         </>
     );
-};
+});
+
+PlatosExtras.displayName = 'PlatosExtras';
 
 export default PlatosExtras;

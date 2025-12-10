@@ -246,3 +246,57 @@
         font-size: 0.8rem;
     }
 }
+
+/* Nuevos estilos para botones tipo card */
+.tipo-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.tipo-btn-card {
+    background: white;
+    border: 3px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.tipo-btn-card:hover {
+    border-color: #4CAF50;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+    transform: translateY(-3px);
+}
+
+.tipo-btn-emoji {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.tipo-btn-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.tipo-btn-price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #4CAF50;
+    margin-bottom: 8px;
+}
+
+.tipo-btn-desc {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+@media (max-width: 640px) {
+    .tipo-buttons {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,6 +1,6 @@
 // src/pages/MenuPage.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Phone, Clock, Facebook, Instagram, Youtube } from 'lucide-react';
 import { getRestaurantData } from '../services/sheetsApi';
 import { getGuarnicionesDisponibles } from '../utils/menuUtils';
@@ -16,6 +16,7 @@ import Toast from '../components/Toast';
 
 const MenuPage = () => {
     const { sheetId, restaurantSlug } = useParams();
+    const navigate = useNavigate();
 
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
@@ -40,6 +41,14 @@ const MenuPage = () => {
     // Estados para Hero
     const [isOpen, setIsOpen] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+
+    // Estados para controlar acordeones (refs para comunicación con hijos)
+    const menuDelDiaRef = useRef(null);
+    const platosExtrasDiaRef = useRef(null);
+    const platosExtrasNocheRef = useRef(null);
+
+    // Estado para diálogo de salida
+    const [mostrarDialogoSalida, setMostrarDialogoSalida] = useState(false);
 
     // Actualizar hora cada minuto
     useEffect(() => {
@@ -109,6 +118,67 @@ const MenuPage = () => {
     useEffect(() => {
         loadData();
     }, [loadData]);
+
+    // ==================== MANEJO DEL BOTÓN ATRÁS ====================
+    useEffect(() => {
+        const handleBackButton = (e) => {
+            // Prevenir el comportamiento por defecto
+            e.preventDefault();
+
+            // PRIORIDAD 1: Si hay modal de resumen abierto, cerrarlo
+            if (mostrarResumen) {
+                setMostrarResumen(false);
+                return;
+            }
+
+            // PRIORIDAD 2: Si hay diálogo de salida, cerrarlo
+            if (mostrarDialogoSalida) {
+                setMostrarDialogoSalida(false);
+                return;
+            }
+
+            // PRIORIDAD 3: Verificar si hay modales internos abiertos
+            // (Los modales de AlmuerzoModal y PlatoModal se manejan dentro de los componentes)
+            // Aquí verificamos si hay acordeones abiertos
+
+            // Verificar si algún acordeón está abierto
+            const menuDelDiaAbierto = menuDelDiaRef.current?.isOpen;
+            const platosExtrasDiaAbierto = platosExtrasDiaRef.current?.isOpen;
+            const platosExtrasNocheAbierto = platosExtrasNocheRef.current?.isOpen;
+
+            const hayAcordeones = menuDelDiaAbierto || platosExtrasDiaAbierto || platosExtrasNocheAbierto;
+
+            // PRIORIDAD 4: Si hay acordeones abiertos, cerrarlos todos
+            if (hayAcordeones) {
+                if (menuDelDiaRef.current?.closeAccordion) {
+                    menuDelDiaRef.current.closeAccordion();
+                }
+                if (platosExtrasDiaRef.current?.closeAccordion) {
+                    platosExtrasDiaRef.current.closeAccordion();
+                }
+                if (platosExtrasNocheRef.current?.closeAccordion) {
+                    platosExtrasNocheRef.current.closeAccordion();
+                }
+                return;
+            }
+
+            // PRIORIDAD 5: Si todo está cerrado, mostrar diálogo de salida
+            setMostrarDialogoSalida(true);
+        };
+
+        // Agregar listener para el botón atrás del navegador (popstate)
+        window.history.pushState(null, '', window.location.pathname);
+        window.addEventListener('popstate', handleBackButton);
+
+        return () => {
+            window.removeEventListener('popstate', handleBackButton);
+        };
+    }, [mostrarResumen, mostrarDialogoSalida]);
+
+    // Función para confirmar salida
+    const handleConfirmarSalida = () => {
+        window.history.back();
+    };
 
     // Función para agregar al carrito con notificación
     const handleAddToCart = (item) => {
@@ -225,6 +295,7 @@ const MenuPage = () => {
                 {/* 1. MENÚ DEL ALMUERZO */}
                 {visibilidad.mostrarAlmuerzo && data.menuDelDia && (
                     <MenuDelDia
+                        ref={menuDelDiaRef}
                         menu={data.menuDelDia}
                         presas={data.opciones.presas}
                         guarniciones={guarnicionesDisponibles}
@@ -235,6 +306,7 @@ const MenuPage = () => {
                 {/* 2. PLATOS EXTRAS - MEDIO DÍA */}
                 {visibilidad.mostrarExtras && hayPlatosExtrasDia && (
                     <PlatosExtras
+                        ref={platosExtrasDiaRef}
                         menuExtras={menuExtrasDia}
                         horarioActual="medio_dia"
                         onAddToCart={handleAddToCart}
@@ -246,6 +318,7 @@ const MenuPage = () => {
                 {/* 3. PLATOS EXTRAS - NOCHE */}
                 {visibilidad.mostrarExtrasNoche && hayPlatosExtrasNoche && (
                     <PlatosExtras
+                        ref={platosExtrasNocheRef}
                         menuExtras={menuExtrasNoche}
                         horarioActual="noche"
                         onAddToCart={handleAddToCart}
@@ -405,6 +478,40 @@ const MenuPage = () => {
                 />
             )}
 
+            {/* Diálogo de confirmación de salida */}
+            {mostrarDialogoSalida && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-scale-in">
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span className="text-3xl">👋</span>
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-800 mb-2">
+                                ¿Deseas salir del menú?
+                            </h3>
+                            <p className="text-gray-600 text-sm">
+                                Volverás a la página anterior
+                            </p>
+                        </div>
+                        
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setMostrarDialogoSalida(false)}
+                                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleConfirmarSalida}
+                                className="flex-1 px-4 py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 transition-colors"
+                            >
+                                Salir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Estilos para animaciones */}
             <style jsx>{`
                 @keyframes fadeIn {
@@ -425,6 +532,21 @@ const MenuPage = () => {
                     50% {
                         opacity: .8;
                     }
+                }
+
+                @keyframes scale-in {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.9);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+
+                .animate-scale-in {
+                    animation: scale-in 0.2s ease-out;
                 }
             `}</style>
         </div>
