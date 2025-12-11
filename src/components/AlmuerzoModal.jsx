@@ -33,10 +33,53 @@ const AlmuerzoModal = ({ isOpen, onClose, tipo, menu, guarniciones, onAddToOrder
         { nombre: menu.segundo_2?.nombre, foto: menu.segundo_2?.foto_url }
     ].filter(s => s.nombre);
 
-    // Convertir guarniciones a array de strings
-    const guarnicionesDisponibles = guarniciones.map(g => 
-        typeof g === 'string' ? g : g.nombre
-    ).filter(Boolean);
+    // FILTRAR GUARNICIONES DISPONIBLES CON VALIDACIÓN DE MIXTO
+    const filtrarGuarniciones = (guarniciones) => {
+        if (!guarniciones || guarniciones.length === 0) return [];
+
+        // Convertir a array de objetos normalizados
+        const guarnicionesArray = guarniciones.map(g => {
+            if (typeof g === 'string') {
+                return { nombre: g, disponible: true };
+            }
+            
+            // Normalizar disponible: puede ser boolean o string
+            let disponible = false;
+            if (g.disponible === true || g.disponible === 'SI' || g.disponible === 'si') {
+                disponible = true;
+            }
+            
+            return {
+                nombre: g.nombre,
+                disponible: disponible
+            };
+        });
+
+        // Verificar si Arroz y Fideo están disponibles (para Mixto)
+        const arrozDisponible = guarnicionesArray.some(g => 
+            g.nombre === 'Arroz' && g.disponible === true
+        );
+        const fideoDisponible = guarnicionesArray.some(g => 
+            g.nombre === 'Fideo' && g.disponible === true
+        );
+
+        // Filtrar guarniciones
+        return guarnicionesArray.filter(g => {
+            // Solo mostrar si está disponible
+            if (!g.disponible) {
+                return false;
+            }
+
+            // Si es Mixto, validar que Arroz Y Fideo estén disponibles
+            if (g.nombre === 'Mixto') {
+                return arrozDisponible && fideoDisponible;
+            }
+
+            return true;
+        }).map(g => g.nombre);
+    };
+
+    const guarnicionesDisponibles = filtrarGuarniciones(guarniciones || []);
 
     // Obtener precio según tipo
     const precioUnitario = tipo === 'completo' 
@@ -155,20 +198,26 @@ const AlmuerzoModal = ({ isOpen, onClose, tipo, menu, guarniciones, onAddToOrder
                 {/* Selección de Guarnición */}
                 <div className="almuerzo-modal-section">
                     <h3>Elige Guarnición *</h3>
-                    <div className="almuerzo-guarniciones-grid">
-                        {guarnicionesDisponibles.map((g, i) => (
-                            <button
-                                key={i}
-                                className={`almuerzo-guarnicion-btn ${
-                                    guarnicionSeleccionada === g ? 'selected' : ''
-                                }`}
-                                onClick={() => setGuarnicionSeleccionada(g)}
-                            >
-                                {g}
-                                {guarnicionSeleccionada === g && ' ✓'}
-                            </button>
-                        ))}
-                    </div>
+                    {guarnicionesDisponibles.length > 0 ? (
+                        <div className="almuerzo-guarniciones-grid">
+                            {guarnicionesDisponibles.map((g, i) => (
+                                <button
+                                    key={i}
+                                    className={`almuerzo-guarnicion-btn ${
+                                        guarnicionSeleccionada === g ? 'selected' : ''
+                                    }`}
+                                    onClick={() => setGuarnicionSeleccionada(g)}
+                                >
+                                    {g}
+                                    {guarnicionSeleccionada === g && ' ✓'}
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="no-guarniciones-warning">
+                            ⚠️ No hay guarniciones disponibles en este momento
+                        </p>
+                    )}
                 </div>
 
                 {/* Selector de Cantidad */}
@@ -197,6 +246,7 @@ const AlmuerzoModal = ({ isOpen, onClose, tipo, menu, guarniciones, onAddToOrder
                 <button 
                     className="almuerzo-add-btn"
                     onClick={handleAgregar}
+                    disabled={guarnicionesDisponibles.length === 0}
                 >
                     Añadir al Carrito - Bs. {precioTotal.toFixed(2)}
                 </button>
