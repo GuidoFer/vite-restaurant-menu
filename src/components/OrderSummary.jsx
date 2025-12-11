@@ -256,16 +256,20 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                             <p className="tiempo-estimado">
                                 ⏱️ Tiempo estimado de preparación: <strong>{tiempoEstimado} minutos</strong>
                             </p>
-                            <p className="instrucciones">
-                                Escanea el código QR para realizar el pago de <strong>Bs. {totalPrecio.toFixed(2)}</strong>
+                            <p className="total-a-pagar">
+                                Total a pagar: <strong>Bs. {totalPrecio.toFixed(2)}</strong>
                             </p>
                         </div>
 
-                        <PaymentModal qrUrl={restaurante.qr_url} />
-
-                        <button className="btn-pago-completado" onClick={handlePagoCompletado}>
-                            ✅ He Realizado el Pago - Enviar Pedido
-                        </button>
+                        <PaymentModal 
+                            isOpen={mostrarPago}
+                            onClose={() => {
+                                setMostrarPago(false);
+                                setMostrarFormulario(true);
+                            }}
+                            onPaymentComplete={handlePagoCompletado}
+                            googleSheetUrl={null}
+                        />
                     </>
                 )}
             </div>

@@ -1,42 +1,274 @@
 /* src/components/css/PaymentModal.css */
 
+/* Overlay del modal */
+.payment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Contenedor del modal */
 .payment-modal {
-    /* Esto simula la visibilidad de un modal flotante. Tu implementación podría variar */
-    /* Aquí asumiremos que siempre está visible para simplicidad, pero debería ser controlado por estado. */
-    /* Para el ejemplo básico, solo estilizar el contenido */
-    max-width: 350px;
-    margin: 20px auto;
-    padding: 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    text-align: center;
+  position: relative;
+  max-width: 400px;
+  width: 90%;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  padding: 30px;
+  text-align: center;
+  animation: slideUp 0.3s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Botón cerrar */
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  color: #999;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.close-button:hover {
+  background: #f0f0f0;
+  color: #333;
+  transform: rotate(90deg);
+}
+
+/* Contenido del modal */
+.payment-content {
+  margin-top: 10px;
 }
 
 .payment-modal h3 {
-    color: #ff7700;
-    margin-bottom: 10px;
+  color: #ff7700;
+  margin-bottom: 10px;
+  font-size: 1.8em;
+  font-weight: bold;
 }
 
+.payment-modal p {
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+/* Banner de advertencia */
+.warning-banner {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 0.9em;
+}
+
+/* Contenedor del QR */
+.qr-container {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Imagen del QR */
 .qr-image {
-    width: 100%;
-    max-width: 250px;
-    height: auto;
-    margin: 15px 0;
-    border: 5px solid #f0f0f0;
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  border: 5px solid white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s;
 }
 
+.qr-image:hover {
+  transform: scale(1.05);
+}
+
+/* Información de pago */
+.payment-info {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  border-left: 4px solid #ff7700;
+}
+
+.payment-info p {
+  margin: 8px 0;
+  color: #333;
+  font-size: 0.95em;
+}
+
+.payment-info strong {
+  color: #ff7700;
+}
+
+.info-note {
+  font-size: 0.85em;
+  color: #999;
+  font-style: italic;
+  margin-top: 10px;
+}
+
+/* Grupo de botones */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Botón de descarga */
 .download-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
 }
 
 .download-button:hover {
-    background-color: #0056b3;
+  background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
+}
+
+.download-button:active {
+  transform: translateY(0);
+}
+
+/* Botón continuar / confirmar pago */
+.continue-button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.continue-button:hover {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+/* Botón de pago completado - estilo destacado */
+.payment-complete-button {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  padding: 14px 24px;
+  font-size: 1.05em;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.payment-complete-button:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ba87e 100%);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
+/* Spinner de carga */
+.loading-spinner {
+  padding: 40px;
+  color: #ff7700;
+}
+
+.loading-spinner p {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Mensaje de error */
+.error-message {
+  color: #dc3545;
+  font-size: 0.9em;
+  margin-top: 10px;
+  padding: 8px;
+  background: #f8d7da;
+  border-radius: 6px;
+}
+
+/* Responsivo para móviles */
+@media (max-width: 480px) {
+  .payment-modal {
+    padding: 20px;
+    width: 95%;
+  }
+
+  .payment-modal h3 {
+    font-size: 1.5em;
+  }
+
+  .qr-image {
+    max-width: 200px;
+  }
+
+  .button-group {
+    gap: 8px;
+  }
+
+  .download-button,
+  .continue-button {
+    padding: 10px 20px;
+    font-size: 0.95em;
+  }
 }
