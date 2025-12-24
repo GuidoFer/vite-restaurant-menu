@@ -1,11 +1,14 @@
 // src/components/OrderSummary.jsx
 import React, { useState, useEffect } from 'react';
 import PaymentModal from './PaymentModal';
+import { guardarPedido } from '../services/pedidosService';
 import './css/OrderSummary.css';
 
 const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
     const [mostrarFormulario, setMostrarFormulario] = useState(true);
     const [mostrarPago, setMostrarPago] = useState(false);
+    const [pedidoGuardado, setPedidoGuardado] = useState(null);
+    const [guardandoPedido, setGuardandoPedido] = useState(false);
     
     const [formData, setFormData] = useState({
         nombre: '',
@@ -56,7 +59,7 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
         setCarrito(prev => prev.filter((_, i) => i !== index));
     };
 
-    const handleConfirmarPedido = () => {
+    const handleConfirmarPedido = async () => {
         // Validar nombre
         if (!formData.nombre.trim()) {
             alert('Por favor ingresa tu nombre completo');
@@ -77,8 +80,41 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
             return;
         }
 
-        setMostrarFormulario(false);
-        setMostrarPago(true);
+        // Guardar pedido en Google Sheets
+        setGuardandoPedido(true);
+        
+        try {
+            const pedidoData = {
+                restaurante_id: restaurante.id || 1,
+                cliente_nombre: formData.nombre,
+                cliente_celular: celularLimpio,
+                items: carrito.map(item => ({
+                    nombre: item.nombre,
+                    precio: item.precio,
+                    cantidad: item.cantidad || 1,
+                    guarnicion: item.guarnicion,
+                    detalles: item.detalles
+                })),
+                total: totalPrecio,
+                notas: formData.notasAdicionales
+            };
+
+            // Guardar en el Sheet específico del restaurante
+            // IMPORTANTE: Asegúrate que restaurante.sheet_id existe
+            const sheetId = restaurante.sheet_id || '1JIiS5ZFvgrLKrsYcag9FclwA30i7HBhxiSdAeEwIghY';
+            const resultado = await guardarPedido(sheetId, pedidoData);
+            
+            setPedidoGuardado(resultado);
+            setMostrarFormulario(false);
+            setMostrarPago(true);
+            
+            console.log('✅ Pedido guardado:', resultado);
+        } catch (error) {
+            console.error('Error guardando pedido:', error);
+            alert('Hubo un problema al guardar el pedido. Por favor intenta nuevamente.');
+        } finally {
+            setGuardandoPedido(false);
+        }
     };
 
     // Generar número de pedido único: YYYYMMDD-HHMM-XXX
@@ -95,10 +131,11 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
     };
 
     const generarMensajeWhatsApp = () => {
-        const numeroPedido = generarNumeroPedido();
+        const codigo = pedidoGuardado?.codigo || 'SIN-CODIGO';
+        const hash = pedidoGuardado?.hash || 'SIN-HASH';
         
         let mensaje = `*🍽️ NUEVO PEDIDO - ${restaurante.nombre}*\n\n`;
-        mensaje += `*📋 Nº Pedido:* ${numeroPedido}\n`;
+        mensaje += `*📋 Código:* ${codigo}\n`;
         mensaje += `*👤 Cliente:* ${formData.nombre}\n`;
         mensaje += `*📱 Celular:* ${formData.celular}\n\n`;
         mensaje += `*PEDIDO:*\n`;
@@ -119,7 +156,9 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
         }
 
         mensaje += `*💰 TOTAL: Bs. ${totalPrecio.toFixed(2)}*\n`;
-        mensaje += `*⏱️ Tiempo estimado: ${tiempoEstimado} minutos*`;
+        mensaje += `*⏱️ Tiempo estimado: ${tiempoEstimado} minutos*\n\n`;
+        mensaje += `🔐 *Verificación:* ${hash}\n`;
+        mensaje += `_Verificar detalles completos en el sistema_`;
 
         return encodeURIComponent(mensaje);
     };
@@ -244,8 +283,9 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                             <button 
                                 className="btn-confirmar"
                                 onClick={handleConfirmarPedido}
+                                disabled={guardandoPedido}
                             >
-                                Continuar al Pago
+                                {guardandoPedido ? 'Procesando...' : 'Continuar al Pago'}
                             </button>
                         </div>
                     </>

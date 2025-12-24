@@ -8,12 +8,15 @@ const SHEET_ID = '1JIiS5ZFvgrLKrsYcag9FclwA30i7HBhxiSdAeEwIghY';
 
 const useMenuData = () => {
     const { slug } = useParams();
-
     const [restaurant, setRestaurant] = useState(null);
     const [menuExtras, setMenuExtras] = useState({});
     const [menuDelDia, setMenuDelDia] = useState(null); 
     const [opciones, setOpciones] = useState({ guarniciones: [], presas: [] });
-    const [visibilidad, setVisibilidad] = useState({ mostrarAlmuerzo: true, mostrarExtras: true, tipo_servicio: 'ambos' });
+    const [visibilidad, setVisibilidad] = useState({ 
+        mostrarAlmuerzo: true, 
+        mostrarExtras: true, 
+        tipo_servicio: 'ambos' 
+    });
     const [lastUpdate, setLastUpdate] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -33,10 +36,10 @@ const useMenuData = () => {
 
         setLoading(true);
         setError(null);
-        
+
         try {
             const data = await getRestaurantData(SHEET_ID, slug);
-            
+
             if (data.error) {
                 setError(data.error);
                 setLoading(false);
@@ -52,13 +55,19 @@ const useMenuData = () => {
                 visibilidad 
             } = data;
 
-            setRestaurant(restaurant);
+            // ✅ AGREGAR sheet_id al objeto restaurant
+            const restaurantWithSheetId = {
+                ...restaurant,
+                sheet_id: SHEET_ID // Agregar el ID del Sheet
+            };
+
+            setRestaurant(restaurantWithSheetId);
             setMenuExtras(menuExtras);
             setMenuDelDia(menuDelDia);
             setOpciones(opciones);
             setLastUpdate(lastUpdate);
             setVisibilidad(visibilidad); 
-            
+
         } catch (err) {
             console.error("Fallo al cargar datos del menú:", err);
             setError('Fallo de conexión o error desconocido.');
