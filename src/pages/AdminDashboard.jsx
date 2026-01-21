@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import '../components/css/AdminDashboard.css';
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0ioXA9goDvZGp4leY2Ym-B-9dXKNRgsRSTgYpHbO9-vEsiyMr6QZhsE-QIF1o4x_U/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDmtF2ZaiwGsflbhu_Y-r-sUqRHx_T3xgTLWAPZrugwYUZ8cK6edT1o67xHpuG-xc7/exec"; 
 
 const AdminDashboard = () => {
     const { sheetId } = useParams();

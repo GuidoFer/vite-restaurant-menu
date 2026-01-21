@@ -1,33 +1,19 @@
 // src/services/pedidosService.js
 
-/**
- * Servicio para guardar pedidos en Google Sheets con verificación
- */
-
-// Actualizado con el ID de tu último deploy
 const DEPLOYMENT_ID = 'AKfycbwDmtF2ZaiwGsflbhu_Y-r-sUqRHx_T3xgTLWAPZrugwYUZ8cK6edT1o67xHpuG-xc7';
 
-/**
- * Guarda un pedido en el Google Sheet específico del restaurante
- */
 export async function guardarPedido(sheetId, datosOpedido) {
   try {
     console.log('📤 Guardando pedido en Google Sheets...');
     
-    // --- LÓGICA DE NORMALIZACIÓN ---
-    // Si datosOpedido ya viene con 'action', extraemos el pedido interno
-    // Si no, asumimos que datosOpedido es el pedido directo
     const esEstructuraNueva = datosOpedido.action === 'guardarPedido';
     const pedidoLimpio = esEstructuraNueva ? datosOpedido.pedido : datosOpedido;
 
-    // Generar código y hash locales para respuesta inmediata
     const codigoLocal = esEstructuraNueva ? datosOpedido.codigo : generarCodigoLocal();
     const hashLocal = esEstructuraNueva ? datosOpedido.hash : generarHashLocal(pedidoLimpio, codigoLocal);
     
-    // Construir URL del script
     const scriptUrl = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
     
-    // Preparar el paquete final para enviar al script
     const datosParaEnviar = {
       action: 'guardarPedido',
       sheetId: sheetId,
@@ -45,40 +31,37 @@ export async function guardarPedido(sheetId, datosOpedido) {
 
     console.log('📡 Enviando datos:', datosParaEnviar);
 
-    // Enviar con modo 'no-cors' para evitar errores de bloqueo de navegador
-    fetch(scriptUrl, {
+    // ✅ CAMBIO: Quitar no-cors y usar text/plain
+    const response = await fetch(scriptUrl, {
       method: 'POST',
-      mode: 'no-cors',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/plain',
       },
       body: JSON.stringify(datosParaEnviar)
-    }).catch(err => {
-      console.log('⚠️ Error de red (ignorable en no-cors):', err);
     });
 
-    // Retornar éxito inmediato con los códigos generados
+    const resultado = await response.json();
+    console.log('✅ Respuesta completa:', resultado);
+
     return {
-      success: true,
-      codigo: codigoLocal,
-      hash: hashLocal
+      success: resultado.success || true,
+      codigo: resultado.codigo || codigoLocal,
+      hash: resultado.hash || hashLocal,
+      nro_pedido: resultado.nro_pedido || '---'
     };
 
   } catch (error) {
-    console.error('❌ Error crítico en guardarPedido:', error);
-    // Fallback de seguridad para no detener la experiencia del usuario
+    console.error('❌ Error:', error);
     return {
       success: false,
       codigo: 'ERROR-GEN',
       hash: '00000000',
+      nro_pedido: '---',
       error: error.message
     };
   }
 }
 
-/**
- * Genera código de pedido local (Ej: ORD-20240121-1830-XYZ)
- */
 function generarCodigoLocal() {
   const now = new Date();
   const year = now.getFullYear();
@@ -96,22 +79,13 @@ function generarCodigoLocal() {
   return `ORD-${year}${month}${day}-${hours}${minutes}-${random}`;
 }
 
-/**
- * Genera hash de verificación (Hexadecimal de 8 caracteres)
- */
 function generarHashLocal(pedido, codigo) {
   try {
-    // Validamos que el total exista y sea número para evitar el error .toFixed
     const totalSafe = pedido && pedido.total ? parseFloat(pedido.total).toFixed(2) : "0.00";
     const nombreSafe = pedido && pedido.cliente_nombre ? pedido.cliente_nombre : "anonimo";
     const itemsLen = pedido && pedido.items ? pedido.items.length : 0;
 
-    const dataString = [
-      codigo,
-      nombreSafe,
-      totalSafe,
-      itemsLen
-    ].join('|');
+    const dataString = [codigo, nombreSafe, totalSafe, itemsLen].join('|');
     
     let hash = 0;
     for (let i = 0; i < dataString.length; i++) {
@@ -124,6 +98,6 @@ function generarHashLocal(pedido, codigo) {
     return hashHex.substring(0, 8).padStart(8, '0');
   } catch (e) {
     console.error("Error en generarHashLocal:", e);
-    return "F1B2C3D4"; // Hash de emergencia
+    return "F1B2C3D4";
   }
 }
