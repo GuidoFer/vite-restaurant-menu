@@ -2,65 +2,62 @@
 
 /**
  * Servicio para guardar pedidos en Google Sheets con verificación
- * Soporta arquitectura multi-tenant (cada restaurante tiene su propio Sheet)
  */
 
-const DEPLOYMENT_ID = 'AKfycbxBkdYkjogErnobdVTDZq92JtL8xjbhbmBD5IQLweThf4rjPKdMk8e6RDQZk1rVPVr9';
+// Actualizado con el ID de tu último deploy
+const DEPLOYMENT_ID = 'AKfycbx0ioXA9goDvZGp4leY2Ym-B-9dXKNRgsRSTgYpHbO9-vEsiyMr6QZhsE-QIF1o4x_U';
 
 /**
  * Guarda un pedido en el Google Sheet específico del restaurante
- * @param {string} sheetId - ID del Google Sheet del restaurante
- * @param {Object} pedido - Datos del pedido
- * @returns {Promise<Object>} - Código y hash de verificación
  */
-export async function guardarPedido(sheetId, pedido) {
+export async function guardarPedido(sheetId, datosOpedido) {
   try {
     console.log('📤 Guardando pedido en Google Sheets...');
-    console.log('📊 Sheet ID:', sheetId);
-    console.log('📋 Pedido:', pedido);
     
-    // Generar código y hash ANTES de enviar
-    const codigoLocal = generarCodigoLocal();
-    const hashLocal = generarHashLocal(pedido, codigoLocal);
+    // --- LÓGICA DE NORMALIZACIÓN ---
+    // Si datosOpedido ya viene con 'action', extraemos el pedido interno
+    // Si no, asumimos que datosOpedido es el pedido directo
+    const esEstructuraNueva = datosOpedido.action === 'guardarPedido';
+    const pedidoLimpio = esEstructuraNueva ? datosOpedido.pedido : datosOpedido;
+
+    // Generar código y hash locales para respuesta inmediata
+    const codigoLocal = esEstructuraNueva ? datosOpedido.codigo : generarCodigoLocal();
+    const hashLocal = esEstructuraNueva ? datosOpedido.hash : generarHashLocal(pedidoLimpio, codigoLocal);
     
-    console.log('📋 Código generado:', codigoLocal);
-    console.log('🔐 Hash generado:', hashLocal);
-    
-    // Construir URL del script desplegado
+    // Construir URL del script
     const scriptUrl = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
     
-    // Preparar datos del pedido (INCLUIR código y hash generados localmente)
+    // Preparar el paquete final para enviar al script
     const datosParaEnviar = {
       action: 'guardarPedido',
       sheetId: sheetId,
-      codigo: codigoLocal,  // ← Enviar código generado
-      hash: hashLocal,      // ← Enviar hash generado
+      codigo: codigoLocal,
+      hash: hashLocal,
       pedido: {
-        restaurante_id: pedido.restaurante_id || 1,
-        cliente_nombre: pedido.cliente_nombre,
-        cliente_celular: pedido.cliente_celular,
-        items: pedido.items,
-        total: pedido.total,
-        notas: pedido.notas || ''
+        restaurante_id: pedidoLimpio.restaurante_id || 1,
+        cliente_nombre: pedidoLimpio.cliente_nombre,
+        cliente_celular: pedidoLimpio.cliente_celular,
+        items: pedidoLimpio.items,
+        total: pedidoLimpio.total,
+        notas: pedidoLimpio.notas || ''
       }
     };
 
-    // NUEVO: Enviar con fetch modo 'no-cors' (fire and forget)
+    console.log('📡 Enviando datos:', datosParaEnviar);
+
+    // Enviar con modo 'no-cors' para evitar errores de bloqueo de navegador
     fetch(scriptUrl, {
       method: 'POST',
-      mode: 'no-cors', // Esto evita el preflight OPTIONS
+      mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(datosParaEnviar)
     }).catch(err => {
-      console.log('⚠️ Error al enviar (pero no bloqueamos):', err);
+      console.log('⚠️ Error de red (ignorable en no-cors):', err);
     });
 
-    console.log('📡 Pedido enviado en segundo plano');
-    console.log('✅ Pedido procesado (usando códigos locales)');
-
-    // Retornar inmediatamente con códigos locales
+    // Retornar éxito inmediato con los códigos generados
     return {
       success: true,
       codigo: codigoLocal,
@@ -68,25 +65,19 @@ export async function guardarPedido(sheetId, pedido) {
     };
 
   } catch (error) {
-    console.error('❌ Error guardando pedido:', error);
-    
-    // Fallback: generar código local
-    const codigoLocal = generarCodigoLocal();
-    const hashLocal = generarHashLocal(pedido, codigoLocal);
-    
-    console.log('⚠️ Usando códigos de respaldo');
-    
+    console.error('❌ Error crítico en guardarPedido:', error);
+    // Fallback de seguridad para no detener la experiencia del usuario
     return {
       success: false,
-      codigo: codigoLocal,
-      hash: hashLocal,
+      codigo: 'ERROR-GEN',
+      hash: '00000000',
       error: error.message
     };
   }
 }
 
 /**
- * Genera código de pedido local
+ * Genera código de pedido local (Ej: ORD-20240121-1830-XYZ)
  */
 function generarCodigoLocal() {
   const now = new Date();
@@ -96,7 +87,6 @@ function generarCodigoLocal() {
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
   
-  // Generar 3 caracteres aleatorios
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let random = '';
   for (let i = 0; i < 3; i++) {
@@ -107,25 +97,33 @@ function generarCodigoLocal() {
 }
 
 /**
- * Genera hash de verificación simple
+ * Genera hash de verificación (Hexadecimal de 8 caracteres)
  */
 function generarHashLocal(pedido, codigo) {
-  const dataString = [
-    codigo,
-    pedido.cliente_nombre,
-    pedido.total.toFixed(2),
-    pedido.items.length
-  ].join('|');
-  
-  // Hash simple usando algoritmo básico
-  let hash = 0;
-  for (let i = 0; i < dataString.length; i++) {
-    const char = dataString.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+  try {
+    // Validamos que el total exista y sea número para evitar el error .toFixed
+    const totalSafe = pedido && pedido.total ? parseFloat(pedido.total).toFixed(2) : "0.00";
+    const nombreSafe = pedido && pedido.cliente_nombre ? pedido.cliente_nombre : "anonimo";
+    const itemsLen = pedido && pedido.items ? pedido.items.length : 0;
+
+    const dataString = [
+      codigo,
+      nombreSafe,
+      totalSafe,
+      itemsLen
+    ].join('|');
+    
+    let hash = 0;
+    for (let i = 0; i < dataString.length; i++) {
+      const char = dataString.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    
+    const hashHex = Math.abs(hash).toString(16).toUpperCase();
+    return hashHex.substring(0, 8).padStart(8, '0');
+  } catch (e) {
+    console.error("Error en generarHashLocal:", e);
+    return "F1B2C3D4"; // Hash de emergencia
   }
-  
-  // Convertir a hex y tomar primeros 8 caracteres
-  const hashHex = Math.abs(hash).toString(16).toUpperCase();
-  return hashHex.substring(0, 8).padStart(8, '0');
 }
