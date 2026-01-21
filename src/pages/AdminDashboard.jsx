@@ -9,14 +9,13 @@ const AdminDashboard = () => {
     const [pedidos, setPedidos] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [cantidadAnterior, setCantidadAnterior] = useState(0);
-    const [alarmaActiva, setAlarmaActiva] = useState(false); // Nuevo estado
+    const [alarmaActiva, setAlarmaActiva] = useState(false);
     const primeraCarga = useRef(true);
     
-    // Usamos useRef para el audio para poder pausarlo desde cualquier lugar
     const audioRef = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2847/2847-preview.mp3'));
 
     useEffect(() => {
-        audioRef.current.loop = true; // Hace que el sonido se repita sin fin
+        audioRef.current.loop = true;
     }, []);
 
     const detenerAlarma = () => {
@@ -37,17 +36,44 @@ const AdminDashboard = () => {
             const response = await fetch(`${SCRIPT_URL}?get=pedidos&sheetId=${sheetId}&_=${cacheBuster}`);
             const result = await response.json();
             
-            const hoy = new Date().toLocaleDateString('en-CA');
+            // 1. Fecha de hoy en Bolivia
+            const hoyBolivia = new Date(new Date().toLocaleString("en-US", {timeZone: "America/La_Paz"}));
+            const diaHoy = hoyBolivia.getDate();
+            const mesHoy = hoyBolivia.getMonth() + 1;
+            const anioHoy = hoyBolivia.getFullYear();
 
             const dataFiltrada = result.data.slice(1)
-                .map(fila => {
-                    let horaLimpia = fila[10];
-                    if (horaLimpia && horaLimpia.toString().includes('T')) {
-                        horaLimpia = horaLimpia.toString().split('T')[1].substring(0, 5);
+                .map((fila) => {
+                    const fechaRaw = fila[0] ? fila[0].toString() : "";
+                    let esDeHoy = false;
+
+                    try {
+                        let d, m, a;
+
+                        if (fechaRaw.includes('T')) {
+                            // FORMATO ISO: "2026-01-21T07:05:10..."
+                            const soloFecha = fechaRaw.split('T')[0]; // "2026-01-21"
+                            const partes = soloFecha.split('-');
+                            a = parseInt(partes[0]);
+                            m = parseInt(partes[1]);
+                            d = parseInt(partes[2]);
+                        } else if (fechaRaw.includes('/')) {
+                            // FORMATO BARRAS: "21/1/2026..."
+                            const soloFecha = fechaRaw.split(' ')[0];
+                            const partes = soloFecha.split('/');
+                            d = parseInt(partes[0]);
+                            m = parseInt(partes[1]);
+                            a = parseInt(partes[2]);
+                        }
+
+                        esDeHoy = (d === diaHoy && m === mesHoy && a === anioHoy);
+                    } catch (e) {
+                        console.error("Error procesando fecha:", fechaRaw);
                     }
 
                     return {
-                        fechaRaw: fila[0],
+                        fechaRaw,
+                        esDeHoy,
                         codigo: fila[1],
                         hash: fila[2],
                         cliente: fila[4],
@@ -56,18 +82,15 @@ const AdminDashboard = () => {
                         total: parseFloat(fila[7] || 0).toFixed(2),
                         notas: fila[8],
                         estado: fila[9],
-                        hora: horaLimpia,
+                        hora: fila[10] || "--:--",
                         nroPedido: fila[11]
                     };
                 })
-                .filter(pedido => {
-                    if (!pedido.fechaRaw) return false;
-                    const fechaPedido = new Date(pedido.fechaRaw).toLocaleDateString('en-CA');
-                    return fechaPedido === hoy;
-                })
+                .filter(pedido => pedido.esDeHoy)
                 .reverse();
 
-            // Lógica de Alarma: Si hay pedidos nuevos y no es la primera carga
+            console.log(`✅ Filtrado final: ${dataFiltrada.length} pedidos para hoy.`);
+
             if (!primeraCarga.current && dataFiltrada.length > cantidadAnterior) {
                 reproducirAlertaPersistente();
             }
@@ -77,7 +100,7 @@ const AdminDashboard = () => {
             primeraCarga.current = false;
 
         } catch (err) { 
-            console.error("Error al obtener pedidos:", err); 
+            console.error("Error crítico:", err); 
         } finally { 
             if (mostrarCarga) setCargando(false); 
         }
@@ -149,7 +172,6 @@ const AdminDashboard = () => {
 
     return (
         <div className="admin-container">
-            {/* BOTÓN DE PARADA DE EMERGENCIA - Solo aparece si la alarma está activa */}
             {alarmaActiva && (
                 <div className="banner-alarma">
                     <button onClick={detenerAlarma} className="btn-detener-alarma">
@@ -163,8 +185,17 @@ const AdminDashboard = () => {
                     <h2>PANEL DE PEDIDOS</h2>
                     <span className="badge-fecha">{new Date().toLocaleDateString()}</span>
                 </div>
-                <button onClick={() => { detenerAlarma(); obtenerPedidos(); }} className="btn-refrescar">
-                    🔄 Actualizar
+                
+                <button onClick={() => { 
+                    audioRef.current.play().then(() => {
+                        audioRef.current.pause(); 
+                        audioRef.current.currentTime = 0;
+                    }).catch(e => console.log("Permiso de sonido activado"));
+                    
+                    detenerAlarma(); 
+                    obtenerPedidos(); 
+                }} className="btn-refrescar">
+                    🔄 Actualizar y Activar Sonido
                 </button>
             </header>
 
