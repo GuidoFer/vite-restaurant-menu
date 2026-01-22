@@ -272,3 +272,16 @@
     font-size: 0.95em;
   }
 }
+
+/* src/components/css/PaymentModal.css */
+
+.payment-complete-button:disabled {
+    background-color: #cccccc !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+    transform: none !important; /* Evita que se mueva al hacer clic */
+}
+
+.payment-complete-button.disabled {
+    pointer-events: none; /* Bloquea clics por completo */
+}
