@@ -1,0 +1,68 @@
+.
+├── eslint.config.js
+├── index.html
+├── package.json
+├── package-lock.json
+├── postcss.config.js
+├── public
+│   └── vite.svg
+├── README.md
+├── src
+│   ├── App.css
+│   ├── App.jsx
+│   ├── assets
+│   │   └── react.svg
+│   ├── components
+│   │   ├── AlmuerzoModal.jsx
+│   │   ├── CarritoButton.jsx
+│   │   ├── css
+│   │   │   ├── AdminDashboard.css
+│   │   │   ├── AlmuerzoModal.css
+│   │   │   ├── CarritoButton.css
+│   │   │   ├── Footer.css
+│   │   │   ├── Hero.css
+│   │   │   ├── Menu.css
+│   │   │   ├── MenuDelDia.css
+│   │   │   ├── Navbar.css
+│   │   │   ├── OpcionesList.css
+│   │   │   ├── OrderButton.css
+│   │   │   ├── OrderSummary.css
+│   │   │   ├── PaymentModal.css
+│   │   │   ├── PlatoModal.css
+│   │   │   ├── PlatosExtras.css
+│   │   │   └── Toast.css
+│   │   ├── ErrorDisplay.jsx
+│   │   ├── FooterInfo.jsx
+│   │   ├── Footer.jsx
+│   │   ├── Header.jsx
+│   │   ├── Hero.jsx
+│   │   ├── MenuDelDia.jsx
+│   │   ├── Menu.jsx
+│   │   ├── Navbar.jsx
+│   │   ├── OpcionesList.jsx
+│   │   ├── OrderButton.jsx
+│   │   ├── OrderSummary.jsx
+│   │   ├── PaymentModal.jsx
+│   │   ├── PlatoModal.jsx
+│   │   ├── PlatosExtras.jsx
+│   │   └── Toast.jsx
+│   ├── hooks
+│   │   └── useMenuData.js
+│   ├── index.css
+│   ├── main.jsx
+│   ├── pages
+│   │   ├── AdminDashboard.jsx
+│   │   ├── MenuPage.jsx
+│   │   └── NotFound.jsx
+│   ├── services
+│   │   ├── googleSheets.js
+│   │   ├── pedidosService.js
+│   │   └── sheetsApi.js
+│   └── utils
+│       └── menuUtils.js
+├── structure.txt
+├── tailwind.config.js
+├── vercel.json
+└── vite.config.js
+
+10 directories, 56 files

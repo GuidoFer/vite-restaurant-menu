@@ -1,6 +1,6 @@
 // src/services/googleSheets.js
 // 🚨 CRÍTICO: Reemplaza con la URL de ejecución de tu script de Google Apps Script
-const GOOGLE_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzkT6e60QPCWQlS4hxjEYTyXVD5rbncYkNCXYVppVC3xG6zhfGfTeeEABmV6d0k82s/exec'; 
+const GOOGLE_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbxCIg_qwgEZquhKRE72d7pdwTCgvUxp5KQMKnKB2FgKkE4FPzqbV-JPjHHA9mAD19bW/exec'; 
 
 /**
  * Obtiene todos los datos de las hojas de Google Sheets.

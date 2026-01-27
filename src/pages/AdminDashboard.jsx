@@ -1,18 +1,44 @@
+// src/pages/AdminDashboard.jsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { getRestaurantBySlug } from '../services/restaurantesService'; // ✅ NUEVO
 import '../components/css/AdminDashboard.css';
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDmtF2ZaiwGsflbhu_Y-r-sUqRHx_T3xgTLWAPZrugwYUZ8cK6edT1o67xHpuG-xc7/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCIg_qwgEZquhKRE72d7pdwTCgvUxp5KQMKnKB2FgKkE4FPzqbV-JPjHHA9mAD19bW/exec"; 
 
 const AdminDashboard = () => {
-    const { sheetId } = useParams();
-    const [pedidos, setPedidos] = useState([]);
+    const { slug } = useParams(); // ✅ CAMBIO: Captura slug en lugar de sheetId
+    const [sheetId, setSheetId] = useState(null); // ✅ NUEVO: Estado para el ID resuelto
     const [cargando, setCargando] = useState(true);
+    const [error, setError] = useState(null); // ✅ NUEVO: Para manejar errores de slug
+    
+    const [pedidos, setPedidos] = useState([]);
     const [cantidadAnterior, setCantidadAnterior] = useState(0);
     const [alarmaActiva, setAlarmaActiva] = useState(false);
     const primeraCarga = useRef(true);
     
     const audioRef = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2847/2847-preview.mp3'));
+
+    // ✅ NUEVO: Resolver slug a sheetId al cargar el componente
+    useEffect(() => {
+        async function resolverSlug() {
+            try {
+                if (!slug) {
+                    setError("Falta el slug en la URL");
+                    setCargando(false);
+                    return;
+                }
+                const restaurante = await getRestaurantBySlug(slug);
+                setSheetId(restaurante.sheetId);
+            } catch (err) {
+                console.error('Error:', err);
+                setError(`Restaurante "${slug}" no encontrado`);
+            } finally {
+                // No quitamos cargando aquí porque obtenerPedidos lo hará después
+            }
+        }
+        resolverSlug();
+    }, [slug]);
 
     useEffect(() => {
         audioRef.current.loop = true;
@@ -29,7 +55,10 @@ const AdminDashboard = () => {
         audioRef.current.play().catch(e => console.log("Interacción requerida para el audio"));
     };
 
+    // ✅ MODIFICADO: Ahora depende de sheetId
     const obtenerPedidos = useCallback(async (mostrarCarga = true) => {
+        if (!sheetId) return; // ✅ Esperar a que se resuelva el slug
+
         if (mostrarCarga) setCargando(true);
         try {
             const cacheBuster = new Date().getTime();
@@ -51,14 +80,12 @@ const AdminDashboard = () => {
                         let d, m, a;
 
                         if (fechaRaw.includes('T')) {
-                            // FORMATO ISO: "2026-01-21T07:05:10..."
-                            const soloFecha = fechaRaw.split('T')[0]; // "2026-01-21"
+                            const soloFecha = fechaRaw.split('T')[0]; 
                             const partes = soloFecha.split('-');
                             a = parseInt(partes[0]);
                             m = parseInt(partes[1]);
                             d = parseInt(partes[2]);
                         } else if (fechaRaw.includes('/')) {
-                            // FORMATO BARRAS: "21/1/2026..."
                             const soloFecha = fechaRaw.split(' ')[0];
                             const partes = soloFecha.split('/');
                             d = parseInt(partes[0]);
@@ -89,8 +116,6 @@ const AdminDashboard = () => {
                 .filter(pedido => pedido.esDeHoy)
                 .reverse();
 
-            console.log(`✅ Filtrado final: ${dataFiltrada.length} pedidos para hoy.`);
-
             if (!primeraCarga.current && dataFiltrada.length > cantidadAnterior) {
                 reproducirAlertaPersistente();
             }
@@ -104,7 +129,7 @@ const AdminDashboard = () => {
         } finally { 
             if (mostrarCarga) setCargando(false); 
         }
-    }, [sheetId, cantidadAnterior]);
+    }, [sheetId, cantidadAnterior]); // ✅ sheetId agregado como dependencia
 
     const renderItems = (itemsRaw) => {
         try {
@@ -163,11 +188,17 @@ const AdminDashboard = () => {
     };
 
     useEffect(() => {
-        obtenerPedidos();
-        const interval = setInterval(() => obtenerPedidos(false), 15000);
-        return () => clearInterval(interval);
-    }, [obtenerPedidos]);
+        if (sheetId) {
+            obtenerPedidos();
+            const interval = setInterval(() => obtenerPedidos(false), 15000);
+            return () => clearInterval(interval);
+        }
+    }, [obtenerPedidos, sheetId]);
 
+    // ✅ MANEJO DE ESTADOS DE CARGA Y ERROR
+    if (cargando && !sheetId) return <div className="admin-centro">Cargando restaurante...</div>;
+    if (error) return <div className="admin-centro">{error}</div>;
+    if (!sheetId) return <div className="admin-centro">Restaurante no encontrado</div>;
     if (cargando) return <div className="admin-centro">Cargando pedidos de cocina...</div>;
 
     return (

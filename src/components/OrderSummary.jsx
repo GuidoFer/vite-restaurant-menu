@@ -34,7 +34,6 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
     const totalPrecio = carrito.reduce((sum, item) => sum + (item.precio * (item.cantidad || 1)), 0);
     const totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
 
-    // Lógica de rangos según cantidad de productos (p)
     const obtenerTiempoTexto = (p) => {
         if (p <= 2) return "10 min";
         if (p > 2 && p <= 4) return "15 min";
@@ -64,7 +63,7 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
         setMostrarPago(true);
     };
 
-    // --- GENERADOR DE MENSAJE WHATSAPP ---
+    // --- GENERADOR DE MENSAJE WHATSAPP (ACTUALIZADO CON DETALLES) ---
     const generarMensajeWhatsApp = (resultado) => {
         const nro = resultado?.nro_pedido || '---';
         const hash = resultado?.hash || '---';
@@ -83,16 +82,21 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
             const subtotal = cantidad * precioUnit;
 
             mensaje += `✅ *${cantidad}x ${item.nombre}*\n`;
-            mensaje += `   _Precio: Bs. ${precioUnit.toFixed(2)} c/u_\n`;
-            mensaje += `   *Subtotal: Bs. ${subtotal.toFixed(2)}*\n`;
-
-            if (item.guarnicion) mensaje += `   🍚 Guarnición: ${item.guarnicion}\n`;
-            if (item.detalles) mensaje += `   💬 Detalle: ${item.detalles}\n`;
-            mensaje += `\n`;
+            
+            // Detalles específicos del Almuerzo
+            if (item.sopa) mensaje += `   • Sopa: ${item.sopa}\n`;
+            if (item.segundo) mensaje += `   • Segundo: ${item.segundo}\n`;
+            if (item.presa) mensaje += `   • Presa: ${item.presa}\n`;
+            if (item.guarnicion) mensaje += `   • Guarnición: ${item.guarnicion}\n`;
+            
+            // Otros detalles o notas del plato
+            if (item.detalles) mensaje += `   💬 Notas: ${item.detalles}\n`;
+            
+            mensaje += `   _Subtotal: Bs. ${subtotal.toFixed(2)}_\n\n`;
         });
 
         if (formData.notasAdicionales) {
-            mensaje += `*📌 NOTAS ADICIONALES:*\n`;
+            mensaje += `*📌 NOTAS GENERALES:*\n`;
             mensaje += `${formData.notasAdicionales}\n\n`;
         }
 
@@ -106,9 +110,8 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
         return encodeURIComponent(mensaje);
     };
 
-    // --- PROCESO DE GUARDADO Y ENVÍO ---
     const handlePagoCompletado = async () => {
-        if (guardandoPedido) return; // Bloqueo de seguridad nivel lógico
+        if (guardandoPedido) return;
 
         setGuardandoPedido(true);
         try {
@@ -117,7 +120,7 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
 
             const pedidoData = {
                 action: 'guardarPedido',
-                sheetId: restaurante.sheet_id || '1JIiS5ZFvgrLKrsYcag9FclwA30i7HBhxiSdAeEwIghY',
+                sheetId: restaurante.sheetId || restaurante.sheet_id || '1JIiS5ZFvgrLKrsYcag9FclwA30i7HBhxiSdAeEwIghY',
                 codigo: codigoGenerado,
                 hash: hashGenerado,
                 pedido: {
@@ -128,6 +131,10 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                         nombre: item.nombre,
                         precio: item.precio,
                         cantidad: item.cantidad || 1,
+                        // Guardamos todo el detalle en el Excel
+                        sopa: item.sopa || null,
+                        segundo: item.segundo || null,
+                        presa: item.presa || null,
                         guarnicion: item.guarnicion || null,
                         detalles: item.detalles || null,
                         subtotal: (item.precio * (item.cantidad || 1))
@@ -138,19 +145,16 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
             };
 
             const respuesta = await guardarPedido(pedidoData.sheetId, pedidoData);
-            
-            // Abrir WhatsApp con el link generado
             const linkWhatsApp = `https://wa.me/591${restaurante.telefono}?text=${generarMensajeWhatsApp(respuesta)}`;
             window.open(linkWhatsApp, '_blank');
             
-            // Limpiar y cerrar
             setCarrito([]);
             onClose();
 
         } catch (error) {
             console.error('❌ Error crítico:', error);
             alert('Error al conectar con el servidor. Intente nuevamente.');
-            setGuardandoPedido(false); // Liberar botón solo si falló el envío
+            setGuardandoPedido(false);
         }
     };
 
@@ -169,7 +173,16 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                                 <div key={index} className="cart-item">
                                     <div className="cart-item-info">
                                         <h4>{item.nombre}</h4>
-                                        {item.guarnicion && <p className="cart-item-guarnicion">🍚 {item.guarnicion}</p>}
+                                        
+                                        {/* ✅ DETALLES VISIBLES EN EL MODAL */}
+                                        <div className="item-order-details">
+                                            {item.sopa && <p>🥣 Sopa: {item.sopa}</p>}
+                                            {item.segundo && <p>🍛 Segundo: {item.segundo}</p>}
+                                            {item.presa && <p>🍗 Presa: {item.presa}</p>}
+                                            {item.guarnicion && <p>🍚 Guarnición: {item.guarnicion}</p>}
+                                            {item.detalles && <p className="item-obs">📝 {item.detalles}</p>}
+                                        </div>
+                                        
                                         <p className="cart-item-precio">Bs. {item.precio.toFixed(2)} c/u</p>
                                     </div>
                                     <div className="cart-item-controls">
@@ -192,6 +205,10 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                             <div className="form-group">
                                 <label>Celular *</label>
                                 <input type="tel" name="celular" value={formData.celular} onChange={handleInputChange} maxLength="8" required />
+                            </div>
+                            <div className="form-group">
+                                <label>Notas para el restaurante (opcional)</label>
+                                <textarea name="notasAdicionales" value={formData.notasAdicionales} onChange={handleInputChange} placeholder="Ej: No tocar timbre, llamar al llegar..." rows="2"></textarea>
                             </div>
                             <button className="btn-confirmar" onClick={handleConfirmarPedido}>Continuar al Pago</button>
                         </div>
