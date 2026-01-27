@@ -1,7 +1,7 @@
 // src/pages/MenuPage.jsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Phone, Clock, Facebook, Instagram, Youtube, UserPlus } from 'lucide-react'; // ✅ Agregado UserPlus
+import { MapPin, Phone, Clock, Facebook, Instagram, Youtube, UserPlus, MessageCircle } from 'lucide-react'; // ✅ MessageCircle agregado
 import { getRestaurantData } from '../services/sheetsApi';
 import { getGuarnicionesDisponibles } from '../utils/menuUtils';
 import { getRestaurantBySlug } from '../services/restaurantesService'; 
@@ -45,27 +45,23 @@ const MenuPage = () => {
     const platosExtrasNocheRef = useRef(null);
     const [mostrarDialogoSalida, setMostrarDialogoSalida] = useState(false);
 
-    // ✅ NUEVA FUNCIÓN: AGENDAR CONTACTO (Sin alterar nada más)
+    // ✅ SOLUCIÓN AL PUNTO CLAVE: AGENDAR VÍA WHATSAPP (Sin archivos complicados)
     const agendarRestaurante = () => {
         if (!data) return;
-        const vcard = `BEGIN:VCARD
-VERSION:3.0
-FN:${data.nombre}
-ORG:${data.nombre}
-TEL;TYPE=CELL,VOICE;VALUE=uri:tel:+591${data.telefono}
-URL:${window.location.href}
-ADR;TYPE=WORK,PREF:;;${data.ubicacion};La Paz;;Bolivia
-NOTE:Menú Digital - Pide por aquí
-END:VCARD`;
-        const blob = new Blob([vcard], { type: 'text/vcard' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${data.nombre.replace(/\s+/g, '_')}.vcf`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setToastMessage('✅ Ficha de contacto generada. ¡Dale a "Guardar"!');
+        
+        const nro = data.telefono;
+        const nombre = data.nombre;
+        
+        // Mensaje que el cliente enviará para iniciar el contacto
+        const mensaje = `Hola *${nombre}*,Te agregare a mis contactos para ver el menu diario y hacer mis pedidos.  ✨`;
+        
+        // Generar URL de WhatsApp
+        const url = `https://wa.me/591${nro}?text=${encodeURIComponent(mensaje)}`;
+        
+        // Abrir WhatsApp directamente
+        window.open(url, '_blank');
+        
+        setToastMessage('📲 Abriendo WhatsApp... ¡Dale a enviar para agendar!');
         setShowToast(true);
     };
 
@@ -239,13 +235,13 @@ END:VCARD`;
                             {isOpen ? 'Abierto Ahora' : 'Cerrado'}
                         </div>
 
-                        {/* ✅ BOTÓN DE CONTACTO AGREGADO */}
+                        {/* ✅ BOTÓN DE CONTACTO WHATSAPP (Cabecera) */}
                         <button 
                             onClick={agendarRestaurante}
                             className="px-4 py-2 rounded-full bg-white text-orange-600 font-bold text-sm flex items-center gap-2 shadow-md hover:bg-orange-50 transition-all active:scale-95"
                         >
-                            <UserPlus className="w-4 h-4" />
-                            Agendar Restaurante
+                            <MessageCircle className="w-4 h-4" />
+                            Registrar Nro.WhatsApp
                         </button>
 
                         <div className="px-4 py-2 rounded-full bg-white bg-opacity-20 backdrop-blur-sm font-medium text-sm flex items-center gap-2">
@@ -313,13 +309,13 @@ END:VCARD`;
             <div className="bg-orange-50 py-12 px-4 mt-8">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-8">
-                        {/* ✅ BOTÓN DE CONTACTO GRANDE AL FINAL */}
+                        {/* ✅ BOTÓN DE CONTACTO WHATSAPP (Final del menú) */}
                         <button 
                             onClick={agendarRestaurante}
-                            className="mb-8 inline-flex items-center gap-3 px-8 py-4 bg-white text-orange-600 border-2 border-orange-500 font-bold rounded-full shadow-lg hover:shadow-xl hover:bg-orange-50 transition-all active:scale-95"
+                            className="mb-8 inline-flex items-center gap-3 px-8 py-4 bg-green-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl hover:bg-green-600 transition-all active:scale-95"
                         >
-                            <UserPlus className="w-6 h-6" />
-                            Guardar número en mis contactos
+                            <MessageCircle className="w-6 h-6" />
+                            Registrar Numero del Restaurante
                         </button>
                     </div>
 
