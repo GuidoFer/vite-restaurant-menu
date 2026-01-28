@@ -120,7 +120,7 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
 
             const pedidoData = {
                 action: 'guardarPedido',
-                sheetId: restaurante.sheetId || restaurante.sheet_id || '1JIiS5ZFvgrLKrsYcag9FclwA30i7HBhxiSdAeEwIghY',
+                sheetId: restaurante.sheetId || restaurante.sheet_id,
                 codigo: codigoGenerado,
                 hash: hashGenerado,
                 pedido: {
