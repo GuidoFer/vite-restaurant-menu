@@ -6,7 +6,7 @@ import './css/PaymentModal.css';
  * Modal flotante para mostrar el código QR de pago.
  */
 function PaymentModal({ isOpen, onClose, onPaymentComplete, qrUrl, restaurante, isSubmitting }) {
-  const QR_BACKUP = "https://i.ibb.co/b5trLpdS/QR-prueba.jpg";
+  const QR_BACKUP = "https://i.ibb.co/TjrhKyp/placeholder-qr-pago.png";
   
   const [currentQrUrl, setCurrentQrUrl] = useState(QR_BACKUP);
   const [loading, setLoading] = useState(false);
