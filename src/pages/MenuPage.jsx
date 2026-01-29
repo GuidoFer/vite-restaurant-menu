@@ -134,6 +134,7 @@ const MenuPage = () => {
                 setVisibilidad(result.visibilidad);
                 setMenuExtrasDia(result.menuExtrasDia);
                 setMenuExtrasNoche(result.menuExtrasNoche);
+                
             }
         } catch (e) {
             setError("Fallo al cargar los datos del restaurante: " + e.message);

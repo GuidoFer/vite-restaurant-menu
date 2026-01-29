@@ -1,4 +1,4 @@
-// src/components/OrderSummary.jsx
+// src/components/OrderSummary.jsx - VERSIÓN PRODUCCIÓN
 import React, { useState, useEffect } from 'react';
 import PaymentModal from './PaymentModal';
 import { guardarPedido } from '../services/pedidosService';
@@ -30,7 +30,6 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
         return () => window.removeEventListener('popstate', handleBackButton);
     }, [mostrarPago, onClose]);
 
-    // --- CÁLCULOS DE TOTALES Y TIEMPOS ---
     const totalPrecio = carrito.reduce((sum, item) => sum + (item.precio * (item.cantidad || 1)), 0);
     const totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
 
@@ -63,7 +62,6 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
         setMostrarPago(true);
     };
 
-    // --- GENERADOR DE MENSAJE WHATSAPP (ACTUALIZADO CON DETALLES) ---
     const generarMensajeWhatsApp = (resultado) => {
         const nro = resultado?.nro_pedido || '---';
         const hash = resultado?.hash || '---';
@@ -73,31 +71,23 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
         mensaje += `--------------------------\n`;
         mensaje += `*💠 Cliente:* ${formData.nombre}\n`;
         mensaje += `*💠 Celular:* ${formData.celular.trim()}\n\n`;
-        
         mensaje += `*📝 DETALLE DEL PEDIDO:*\n`;
         
         carrito.forEach((item) => {
             const cantidad = item.cantidad || 1;
-            const precioUnit = item.precio;
-            const subtotal = cantidad * precioUnit;
+            const subtotal = cantidad * item.precio;
 
             mensaje += `✅ *${cantidad}x ${item.nombre}*\n`;
-            
-            // Detalles específicos del Almuerzo
             if (item.sopa) mensaje += `   • Sopa: ${item.sopa}\n`;
             if (item.segundo) mensaje += `   • Segundo: ${item.segundo}\n`;
             if (item.presa) mensaje += `   • Presa: ${item.presa}\n`;
             if (item.guarnicion) mensaje += `   • Guarnición: ${item.guarnicion}\n`;
-            
-            // Otros detalles o notas del plato
             if (item.detalles) mensaje += `   💬 Notas: ${item.detalles}\n`;
-            
             mensaje += `   _Subtotal: Bs. ${subtotal.toFixed(2)}_\n\n`;
         });
 
         if (formData.notasAdicionales) {
-            mensaje += `*📌 NOTAS GENERALES:*\n`;
-            mensaje += `${formData.notasAdicionales}\n\n`;
+            mensaje += `*📌 NOTAS GENERALES:*\n${formData.notasAdicionales}\n\n`;
         }
 
         mensaje += `--------------------------\n`;
@@ -113,14 +103,20 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
     const handlePagoCompletado = async () => {
         if (guardandoPedido) return;
 
+        if (!restaurante.sheet_id) {
+            alert('Error: No se encontró configuración de destino para el restaurante.');
+            return;
+        }
+
         setGuardandoPedido(true);
+
         try {
             const codigoGenerado = `ORD-${new Date().getTime()}`;
             const hashGenerado = Math.floor(100000 + Math.random() * 900000).toString();
 
             const pedidoData = {
                 action: 'guardarPedido',
-                sheetId: restaurante.sheetId || restaurante.sheet_id,
+                sheetId: restaurante.sheet_id,
                 codigo: codigoGenerado,
                 hash: hashGenerado,
                 pedido: {
@@ -131,7 +127,6 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                         nombre: item.nombre,
                         precio: item.precio,
                         cantidad: item.cantidad || 1,
-                        // Guardamos todo el detalle en el Excel
                         sopa: item.sopa || null,
                         segundo: item.segundo || null,
                         presa: item.presa || null,
@@ -152,7 +147,7 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
             onClose();
 
         } catch (error) {
-            console.error('❌ Error crítico:', error);
+            console.error('Error al guardar pedido:', error);
             alert('Error al conectar con el servidor. Intente nuevamente.');
             setGuardandoPedido(false);
         }
@@ -173,8 +168,6 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                                 <div key={index} className="cart-item">
                                     <div className="cart-item-info">
                                         <h4>{item.nombre}</h4>
-                                        
-                                        {/* ✅ DETALLES VISIBLES EN EL MODAL */}
                                         <div className="item-order-details">
                                             {item.sopa && <p>🥣 Sopa: {item.sopa}</p>}
                                             {item.segundo && <p>🍛 Segundo: {item.segundo}</p>}
@@ -182,7 +175,6 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                                             {item.guarnicion && <p>🍚 Guarnición: {item.guarnicion}</p>}
                                             {item.detalles && <p className="item-obs">📝 {item.detalles}</p>}
                                         </div>
-                                        
                                         <p className="cart-item-precio">Bs. {item.precio.toFixed(2)} c/u</p>
                                     </div>
                                     <div className="cart-item-controls">

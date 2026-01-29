@@ -1,4 +1,4 @@
-// src/services/sheetsApi.js - CÓDIGO COMPLETO
+// src/services/sheetsApi.js - CÓDIGO LIMPIO
 import { fetchGoogleSheet } from './googleSheets.js';
 
 export async function getRestaurantData(sheetId, restaurantSlug) {
@@ -7,12 +7,12 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
     }
     
     try {
-        const sheetData = await fetchGoogleSheet(sheetId);
+        let sheetData = await fetchGoogleSheet(sheetId);
 
-        if (!Array.isArray(sheetData) || sheetData.length < 5) { 
-             throw new Error('Datos incompletos: fetchGoogleSheet falló o devolvió datos inválidos (se esperaban al menos 5 hojas).');
+        if (Array.isArray(sheetData) && sheetData.length === 1 && Array.isArray(sheetData[0])) {
+            sheetData = sheetData[0];
         }
-
+        
         // ----------------------------------------------------
         // 1. Procesar Restaurantes (Hoja 0)
         // ----------------------------------------------------
@@ -64,7 +64,7 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
             });
 
         // ----------------------------------------------------
-        // 3. Procesar Visibilidad (Hoja 4) - CON EXTRAS NOCHE
+        // 3. Procesar Visibilidad (Hoja 4)
         // ----------------------------------------------------
         const visibilityData = sheetData[4] || []; 
         const visibilityHeaders = visibilityData.length ? visibilityData[0].map(h => h.toLowerCase().trim()) : [];
@@ -72,7 +72,7 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
         
         let mostrarAlmuerzo = false; 
         let mostrarExtras = false;
-        let mostrarExtrasNoche = false; // NUEVO
+        let mostrarExtrasNoche = false;
         let horarioActual = 'medio_dia';
         
         if (visibilityRow) {
@@ -83,12 +83,12 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
                 
             mostrarAlmuerzo = visibilityMap.mostrar_almuerzo?.toLowerCase() === 'si';
             mostrarExtras = visibilityMap.mostrar_extras?.toLowerCase() === 'si';
-            mostrarExtrasNoche = visibilityMap.mostrar_extras_noche?.toLowerCase() === 'si'; // NUEVO
+            mostrarExtrasNoche = visibilityMap.mostrar_extras_noche?.toLowerCase() === 'si';
             horarioActual = (visibilityMap.horario_actual?.toLowerCase() === 'noche' ? 'noche' : 'medio_dia');
         }
 
         // ----------------------------------------------------
-        // 4. Procesar Platos (Hoja 1) - Con Horario
+        // 4. Procesar Platos (Hoja 1)
         // ----------------------------------------------------
         const platosData = sheetData[1] || [];
         const platosHeaders = platosData.length ? platosData[0].map(h => h.toLowerCase().trim()) : [];
@@ -132,72 +132,76 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
                     menuPorHorario.noche[categoria].push(plato);
                 }
             });
-
+        
         // ----------------------------------------------------
         // 5. Procesar Menu del Día (Hoja 3)
         // ----------------------------------------------------
-        const menuDiaData = sheetData[3] || [];
-        const menuDiaHeaders = menuDiaData.length ? menuDiaData[0].map(h => h?.toLowerCase().trim() || '') : []; 
-        
-        const now = new Date();
-        const todayIndex = now.toLocaleDateString('en-US', { timeZone: 'America/La_Paz', weekday: 'long' });                 
-        const dayMap = {
-            'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
-            'thursday': 4, 'friday': 5, 'saturday': 6
-        };
-        const numericDay = dayMap[todayIndex.toLowerCase()] ?? now.getDay(); 
-        
-        const menuDelDiaRow = menuDiaData.slice(1).find(row => {
-            const itemRestId = (row[0]?.toString() || '').replace(/\s+/g, '').trim(); 
-            const itemDia = (row[1]?.toString() || '').replace(/\s+/g, '').trim();    
-            const cleanId = (id?.toString() || '').replace(/\s+/g, '').trim();
-            
-            return itemRestId === cleanId && itemDia === numericDay.toString(); 
-        });
-
         let menuDelDia = null;
-        if (menuDelDiaRow) {
-            const rowMap = {};
-            menuDiaHeaders.forEach((header, index) => {
-                rowMap[header] = menuDelDiaRow[index];
-            });
+        try {
+            const menuDiaData = sheetData[3] || [];
+            const menuDiaHeaders = menuDiaData.length ? menuDiaData[0].map(h => h?.toLowerCase().trim() || '') : []; 
             
-            menuDelDia = {
-                sopa: { nombre: rowMap.sopa || 'No disponible', foto_url: rowMap.foto_sopa || '' },
-                segundo_1: { nombre: rowMap.segundo_1 || '', foto_url: rowMap.foto_s1 || '' },
-                segundo_2: { nombre: rowMap.segundo_2 || '', foto_url: rowMap.foto_s2 || '' },
-                segundo_3: { nombre: rowMap.segundo_3 || '', foto_url: rowMap.foto_s3 || '' },
-                postre: { nombre: rowMap.postre || '' },
-                
-                precios: {
-                    completo: parseFloat(precio_almuerzo) || 0, 
-                    sopa_suelta: parseFloat(rowMap.precio_sopa_suelta) || 0,
-                    segundo_suelto: parseFloat(rowMap.precio_segundo_suelto) || 0
-                }
+            const now = new Date();
+            const todayIndex = now.toLocaleDateString('en-US', { timeZone: 'America/La_Paz', weekday: 'long' });                 
+            const dayMap = {
+                'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
+                'thursday': 4, 'friday': 5, 'saturday': 6
             };
+            const numericDay = dayMap[todayIndex.toLowerCase()] ?? now.getDay(); 
+            
+            const menuDelDiaRow = menuDiaData.slice(1).find(row => {
+                const itemRestId = (row[0]?.toString() || '').replace(/\s+/g, '').trim(); 
+                const itemDia = (row[1]?.toString() || '').replace(/\s+/g, '').trim();    
+                const cleanId = (id?.toString() || '').replace(/\s+/g, '').trim();
+                
+                return itemRestId === cleanId && itemDia === numericDay.toString(); 
+            });
+
+            if (menuDelDiaRow) {
+                const rowMap = {};
+                menuDiaHeaders.forEach((header, index) => {
+                    rowMap[header] = menuDelDiaRow[index];
+                });
+                
+                menuDelDia = {
+                    sopa: { nombre: rowMap.sopa || 'No disponible', foto_url: rowMap.foto_sopa || '' },
+                    segundo_1: { nombre: rowMap.segundo_1 || '', foto_url: rowMap.foto_s1 || '' },
+                    segundo_2: { nombre: rowMap.segundo_2 || '', foto_url: rowMap.foto_s2 || '' },
+                    segundo_3: { nombre: rowMap.segundo_3 || '', foto_url: rowMap.foto_s3 || '' },
+                    postre: { nombre: rowMap.postre || '' },
+                    
+                    precios: {
+                        completo: parseFloat(precio_almuerzo) || 0, 
+                        sopa_suelta: parseFloat(rowMap.precio_sopa_suelta) || 0,
+                        segundo_suelto: parseFloat(rowMap.precio_segundo_suelto) || 0
+                    }
+                };
+            }
+        } catch (error) {
+            menuDelDia = null;
         }
         
         // ----------------------------------------------------
-        // 6. RETURN FINAL - CON AMBOS MENÚS SEPARADOS
+        // 6. RETURN FINAL
         // ----------------------------------------------------
         return {
-            restaurant: { id, nombre, qr_url, ubicacion, telefono, tipo_servicio },
-            menuExtrasDia: menuPorHorario.medio_dia, // SEPARADO
-            menuExtrasNoche: menuPorHorario.noche,   // SEPARADO
+            restaurant: { id, nombre, qr_url, ubicacion, telefono, tipo_servicio, sheet_id: sheetId },
+            menuExtrasDia: menuPorHorario.medio_dia, 
+            menuExtrasNoche: menuPorHorario.noche,   
             menuDelDia: menuDelDia,             
             opciones: opcionesAgrupadas,
             lastUpdate: new Date().toLocaleTimeString('es-BO', { timeZone: 'America/La_Paz' }),
             visibilidad: { 
                 mostrarAlmuerzo, 
                 mostrarExtras,
-                mostrarExtrasNoche, // NUEVO
+                mostrarExtrasNoche,
                 tipo_servicio, 
                 horarioActual
             }
         };
-        
+
     } catch (error) {
-        console.error('Error FATAL en sheetsApi (Procesamiento de datos):', error);
-        return { error: error.message || 'Fallo al conectar con la API o error de formato de datos.' };
+        console.error('Error FATAL en sheetsApi:', error);
+        return { error: error.message || 'Fallo al procesar los datos de la hoja.' };
     }
 }

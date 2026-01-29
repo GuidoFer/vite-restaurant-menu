@@ -1,6 +1,6 @@
 // src/services/googleSheets.js
 // 🚨 CRÍTICO: Reemplaza con la URL de ejecución de tu script de Google Apps Script
-const GOOGLE_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbxCIg_qwgEZquhKRE72d7pdwTCgvUxp5KQMKnKB2FgKkE4FPzqbV-JPjHHA9mAD19bW/exec'; 
+const GOOGLE_SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbwn10DGmEntPVk-ojtj4q3WH4cy_BnF7RiCJ0dHvOnZnfeyQtsAe-5fi_yKOyfIMO0/exec'; 
 
 /**
  * Obtiene todos los datos de las hojas de Google Sheets.
@@ -13,7 +13,6 @@ export async function fetchGoogleSheet(sheetId) {
 
     try {
         const url = `${GOOGLE_SHEETS_API_URL}?sheetId=${sheetId}`;
-        console.log(`Intentando conectar a la API con la URL: ${url}`);
         
         const response = await fetch(url);
         

@@ -3,7 +3,7 @@
 const CONTROL_SHEET_ID = '1JIiS5ZFvgrLKrsYcag9FclwA30i7HBhxiSdAeEwIghY';
 
 // ⚠️ REEMPLAZA ESTE ID con el nuevo que te dé Google al "Implementar" el script corregido
-const DEPLOYMENT_ID = 'AKfycbxCIg_qwgEZquhKRE72d7pdwTCgvUxp5KQMKnKB2FgKkE4FPzqbV-JPjHHA9mAD19bW';
+const DEPLOYMENT_ID = 'AKfycbwn10DGmEntPVk-ojtj4q3WH4cy_BnF7RiCJ0dHvOnZnfeyQtsAe-5fi_yKOyfIMO0';
 
 /**
  * Busca un restaurante en la hoja maestra utilizando su slug amigable.

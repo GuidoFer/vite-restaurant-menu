@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { getRestaurantBySlug } from '../services/restaurantesService'; // ✅ NUEVO
 import '../components/css/AdminDashboard.css';
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCIg_qwgEZquhKRE72d7pdwTCgvUxp5KQMKnKB2FgKkE4FPzqbV-JPjHHA9mAD19bW/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwn10DGmEntPVk-ojtj4q3WH4cy_BnF7RiCJ0dHvOnZnfeyQtsAe-5fi_yKOyfIMO0/exec"; 
 
 const AdminDashboard = () => {
     const { slug } = useParams(); // ✅ CAMBIO: Captura slug en lugar de sheetId
