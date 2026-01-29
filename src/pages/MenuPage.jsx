@@ -1,7 +1,7 @@
 // src/pages/MenuPage.jsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Phone, Clock, Facebook, Instagram, Youtube, UserPlus, MessageCircle } from 'lucide-react'; // ✅ MessageCircle agregado
+import { MapPin, Phone, Clock, Facebook, Instagram, Youtube, UserPlus, MessageCircle, AlertTriangle } from 'lucide-react'; 
 import { getRestaurantData } from '../services/sheetsApi';
 import { getGuarnicionesDisponibles } from '../utils/menuUtils';
 import { getRestaurantBySlug } from '../services/restaurantesService'; 
@@ -45,22 +45,17 @@ const MenuPage = () => {
     const platosExtrasNocheRef = useRef(null);
     const [mostrarDialogoSalida, setMostrarDialogoSalida] = useState(false);
 
-    // ✅ SOLUCIÓN AL PUNTO CLAVE: AGENDAR VÍA WHATSAPP (Sin archivos complicados)
+    // ✅ LÓGICA DE ESTADO (PAUSA/CIERRE)
+    const estadoServicio = data?.estado || 'ABIERTO';
+    const estaBloqueado = estadoServicio !== 'ABIERTO';
+
     const agendarRestaurante = () => {
         if (!data) return;
-        
         const nro = data.telefono;
         const nombre = data.nombre;
-        
-        // Mensaje que el cliente enviará para iniciar el contacto
         const mensaje = `Hola *${nombre}*,Te agregare a mis contactos para ver el menu diario y hacer mis pedidos.  ✨`;
-        
-        // Generar URL de WhatsApp
         const url = `https://wa.me/591${nro}?text=${encodeURIComponent(mensaje)}`;
-        
-        // Abrir WhatsApp directamente
         window.open(url, '_blank');
-        
         setToastMessage('📲 Abriendo WhatsApp... ¡Dale a enviar para agendar!');
         setShowToast(true);
     };
@@ -134,7 +129,6 @@ const MenuPage = () => {
                 setVisibilidad(result.visibilidad);
                 setMenuExtrasDia(result.menuExtrasDia);
                 setMenuExtrasNoche(result.menuExtrasNoche);
-                
             }
         } catch (e) {
             setError("Fallo al cargar los datos del restaurante: " + e.message);
@@ -177,6 +171,7 @@ const MenuPage = () => {
     };
 
     const handleAddToCart = (item) => {
+        if (estaBloqueado) return; // Seguridad extra
         setCarrito(prev => [...prev, item]);
         const cantidad = item.cantidad || 1;
         const cantidadTexto = cantidad === 1 ? '' : `${cantidad} `;
@@ -230,13 +225,12 @@ const MenuPage = () => {
                     
                     <div className="flex flex-wrap justify-center gap-3 mb-4">
                         <div className={`px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2 transition-all duration-300 ${
-                            isOpen ? 'bg-green-500 shadow-lg' : 'bg-gray-500 opacity-80'
+                            isOpen && !estaBloqueado ? 'bg-green-500 shadow-lg' : 'bg-gray-500 opacity-80'
                         }`}>
-                            <span className={`w-3 h-3 rounded-full ${isOpen ? 'bg-white' : 'bg-gray-300'}`}></span>
-                            {isOpen ? 'Abierto Ahora' : 'Cerrado'}
+                            <span className={`w-3 h-3 rounded-full ${isOpen && !estaBloqueado ? 'bg-white' : 'bg-gray-300'}`}></span>
+                            {(isOpen && !estaBloqueado) ? 'Abierto Ahora' : 'Cerrado / Pausado'}
                         </div>
 
-                        {/* ✅ BOTÓN DE CONTACTO WHATSAPP (Cabecera) */}
                         <button 
                             onClick={agendarRestaurante}
                             className="px-4 py-2 rounded-full bg-white text-orange-600 font-bold text-sm flex items-center gap-2 shadow-md hover:bg-orange-50 transition-all active:scale-95"
@@ -274,53 +268,76 @@ const MenuPage = () => {
             </div>
 
             <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+                
+                {/* ✅ BANNER DE ESTADO DINÁMICO */}
+                {estaBloqueado && (
+                    <div className={`mb-6 p-4 rounded-2xl flex items-center gap-4 text-white shadow-xl animate-bounce-subtle ${
+                        estadoServicio === 'PAUSADO' ? 'bg-orange-500' : 'bg-red-600'
+                    }`}>
+                        <AlertTriangle className="w-10 h-10 flex-shrink-0" />
+                        <div>
+                            <h3 className="font-bold text-lg">
+                                {estadoServicio === 'PAUSADO' ? 'Saturación Temporal' : 'Servicio Cerrado'}
+                            </h3>
+                            <p className="text-sm opacity-90">
+                                {estadoServicio === 'PAUSADO' 
+                                    ? "Estamos atendiendo muchos pedidos. El menú se habilitará en unos minutos." 
+                                    : "Lo sentimos, ya no recibimos pedidos por el día de hoy."}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 {visibilidad.mostrarAlmuerzo && data.menuDelDia && (
-                    <MenuDelDia
-                        ref={menuDelDiaRef}
-                        menu={data.menuDelDia}
-                        presas={data.opciones.presas}
-                        guarniciones={guarnicionesDisponibles}
-                        onAddToOrder={handleAddToCart}
-                    />
+                    <div className={estaBloqueado ? "pointer-events-none opacity-60 grayscale-[0.5]" : ""}>
+                        <MenuDelDia
+                            ref={menuDelDiaRef}
+                            menu={data.menuDelDia}
+                            presas={data.opciones.presas}
+                            guarniciones={guarnicionesDisponibles}
+                            onAddToOrder={handleAddToCart}
+                        />
+                    </div>
                 )}
 
                 {visibilidad.mostrarExtras && hayPlatosExtrasDia && (
-                    <PlatosExtras
-                        ref={platosExtrasDiaRef}
-                        menuExtras={menuExtrasDia}
-                        horarioActual="medio_dia"
-                        onAddToCart={handleAddToCart}
-                        guarniciones={guarnicionesDisponibles}
-                        theme="dia"
-                    />
+                    <div className={estaBloqueado ? "pointer-events-none opacity-60 grayscale-[0.5]" : ""}>
+                        <PlatosExtras
+                            ref={platosExtrasDiaRef}
+                            menuExtras={menuExtrasDia}
+                            horarioActual="medio_dia"
+                            onAddToCart={handleAddToCart}
+                            guarniciones={guarnicionesDisponibles}
+                            theme="dia"
+                        />
+                    </div>
                 )}
 
                 {visibilidad.mostrarExtrasNoche && hayPlatosExtrasNoche && (
-                    <PlatosExtras
-                        ref={platosExtrasNocheRef}
-                        menuExtras={menuExtrasNoche}
-                        horarioActual="noche"
-                        onAddToCart={handleAddToCart}
-                        guarniciones={guarnicionesDisponibles}
-                        theme="noche"
-                    />
+                    <div className={estaBloqueado ? "pointer-events-none opacity-60 grayscale-[0.5]" : ""}>
+                        <PlatosExtras
+                            ref={platosExtrasNocheRef}
+                            menuExtras={menuExtrasNoche}
+                            horarioActual="noche"
+                            onAddToCart={handleAddToCart}
+                            guarniciones={guarnicionesDisponibles}
+                            theme="noche"
+                        />
+                    </div>
                 )}
             </div>
 
             <div className="bg-orange-50 py-12 px-4 mt-8">
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-8">
-                        {/* ✅ BOTÓN DE CONTACTO WHATSAPP (Final del menú) */}
-                        <button 
-                            onClick={agendarRestaurante}
-                            className="mb-8 inline-flex items-center gap-3 px-8 py-4 bg-green-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl hover:bg-green-600 transition-all active:scale-95"
-                        >
-                            <MessageCircle className="w-6 h-6" />
-                            Registrar Numero del Restaurante
-                        </button>
-                    </div>
+                <div className="max-w-4xl mx-auto text-center">
+                    <button 
+                        onClick={agendarRestaurante}
+                        className="mb-8 inline-flex items-center gap-3 px-8 py-4 bg-green-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl hover:bg-green-600 transition-all active:scale-95"
+                    >
+                        <MessageCircle className="w-6 h-6" />
+                        Registrar Numero del Restaurante
+                    </button>
 
-                    <div className="text-center mb-8">
+                    <div className="mb-8">
                         <a
                             href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.ubicacion)}`}
                             target="_blank"
@@ -332,20 +349,18 @@ const MenuPage = () => {
                         </a>
                     </div>
 
-                    <div className="text-center mb-8">
-                        <h3 className="text-2xl font-bold text-gray-800 mb-4">Síguenos en Redes</h3>
-                        <div className="flex justify-center gap-4">
-                            <a href="#" className="w-12 h-12 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg" aria-label="Facebook"><Facebook className="w-6 h-6" /></a>
-                            <a href="#" className="w-12 h-12 flex items-center justify-center bg-pink-600 text-white rounded-full shadow-lg" aria-label="Instagram"><Instagram className="w-6 h-6" /></a>
-                            <a href="#" className="w-12 h-12 flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg" aria-label="YouTube"><Youtube className="w-6 h-6" /></a>
-                        </div>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4">Síguenos en Redes</h3>
+                    <div className="flex justify-center gap-4">
+                        <a href="#" className="w-12 h-12 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg"><Facebook className="w-6 h-6" /></a>
+                        <a href="#" className="w-12 h-12 flex items-center justify-center bg-pink-600 text-white rounded-full shadow-lg"><Instagram className="w-6 h-6" /></a>
+                        <a href="#" className="w-12 h-12 flex items-center justify-center bg-red-600 text-white rounded-full shadow-lg"><Youtube className="w-6 h-6" /></a>
                     </div>
                 </div>
             </div>
 
             <footer className="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-8 px-4">
-                <div className="max-w-4xl mx-auto">
-                    <div className="grid md:grid-cols-3 gap-6 mb-6">
+                <div className="max-w-4xl mx-auto text-center">
+                    <div className="grid md:grid-cols-3 gap-6 mb-6 text-left">
                         <div>
                             <h4 className="font-bold text-lg mb-3">{data.nombre}</h4>
                             <p className="text-gray-400 text-sm">Comida casera con el sabor de siempre</p>
@@ -360,7 +375,7 @@ const MenuPage = () => {
                             <p className="text-gray-400 text-sm flex items-center gap-2"><MapPin className="w-4 h-4" />{data.ubicacion}</p>
                         </div>
                     </div>
-                    <div className="border-t border-gray-700 pt-6 text-center">
+                    <div className="border-t border-gray-700 pt-6">
                         <p className="text-gray-400 text-sm mb-3">© 2024 {data.nombre}. Todos los derechos reservados.</p>
                         <div className="flex items-center justify-center gap-2 text-gray-500 text-xs">
                             <span>Powered by</span>
@@ -370,7 +385,10 @@ const MenuPage = () => {
                 </div>
             </footer>
 
-            <CarritoButton itemCount={totalItems} total={totalPrecio} onClick={() => setMostrarResumen(true)} />
+            {/* ✅ OCULTAR CARRITO SI ESTÁ BLOQUEADO */}
+            {!estaBloqueado && (
+                <CarritoButton itemCount={totalItems} total={totalPrecio} onClick={() => setMostrarResumen(true)} />
+            )}
 
             {mostrarResumen && (
                 <OrderSummary
@@ -403,7 +421,9 @@ const MenuPage = () => {
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .8; } }
                 @keyframes scale-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+                @keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
                 .animate-scale-in { animation: scale-in 0.2s ease-out; }
+                .animate-bounce-subtle { animation: bounce-subtle 2s infinite ease-in-out; }
             `}</style>
         </div>
     );

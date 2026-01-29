@@ -74,6 +74,7 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
         let mostrarExtras = false;
         let mostrarExtrasNoche = false;
         let horarioActual = 'medio_dia';
+        let estadoServicio = 'ABIERTO'; // ✅ Valor por defecto
         
         if (visibilityRow) {
             const visibilityMap = {};
@@ -85,6 +86,9 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
             mostrarExtras = visibilityMap.mostrar_extras?.toLowerCase() === 'si';
             mostrarExtrasNoche = visibilityMap.mostrar_extras_noche?.toLowerCase() === 'si';
             horarioActual = (visibilityMap.horario_actual?.toLowerCase() === 'noche' ? 'noche' : 'medio_dia');
+            
+            // ✅ CAPTURA DEL NUEVO ESTADO (dropdown en columna F / estado_servicio)
+            estadoServicio = visibilityMap.estado_servicio ? visibilityMap.estado_servicio.toUpperCase().trim() : 'ABIERTO';
         }
 
         // ----------------------------------------------------
@@ -185,7 +189,16 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
         // 6. RETURN FINAL
         // ----------------------------------------------------
         return {
-            restaurant: { id, nombre, qr_url, ubicacion, telefono, tipo_servicio, sheet_id: sheetId },
+            restaurant: { 
+                id, 
+                nombre, 
+                qr_url, 
+                ubicacion, 
+                telefono, 
+                tipo_servicio, 
+                sheet_id: sheetId,
+                estado: estadoServicio // ✅ PASAMOS EL ESTADO AL RESTAURANTE
+            },
             menuExtrasDia: menuPorHorario.medio_dia, 
             menuExtrasNoche: menuPorHorario.noche,   
             menuDelDia: menuDelDia,             
@@ -196,7 +209,8 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
                 mostrarExtras,
                 mostrarExtrasNoche,
                 tipo_servicio, 
-                horarioActual
+                horarioActual,
+                estado: estadoServicio // ✅ TAMBIÉN AQUÍ POR SI ACASO
             }
         };
 
