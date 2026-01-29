@@ -5,6 +5,7 @@ import './css/PlatoModal.css';
 const PlatoModal = ({ plato, guarniciones, onClose, onAddToCart }) => {
     const [cantidad, setCantidad] = useState(1);
     const [guarnicionSeleccionada, setGuarnicionSeleccionada] = useState('');
+    const [detalles, setDetalles] = useState(''); // ✅ Único añadido: Estado para capturar la nota
 
     // Manejar botón atrás cuando el modal está abierto
     useEffect(() => {
@@ -30,7 +31,7 @@ const PlatoModal = ({ plato, guarniciones, onClose, onAddToCart }) => {
     const precio = parseFloat(plato.precio);
     const total = precio * cantidad;
 
-    // FILTRAR GUARNICIONES DISPONIBLES CON VALIDACIÓN DE MIXTO
+    // FILTRAR GUARNICIONES DISPONIBLES CON VALIDACIÓN DE MIXTO (Tu lógica original intacta)
     const filtrarGuarniciones = (guarniciones) => {
         if (!guarniciones || guarniciones.length === 0) return [];
 
@@ -95,6 +96,7 @@ const PlatoModal = ({ plato, guarniciones, onClose, onAddToCart }) => {
             precio: precio,
             cantidad: cantidad,
             guarnicion: guarnicionSeleccionada || null,
+            detalles: detalles, // ✅ Único añadido: Se envía la nota al carrito
             type: 'extra'
         });
 
@@ -151,11 +153,33 @@ const PlatoModal = ({ plato, guarniciones, onClose, onAddToCart }) => {
                         <button onClick={incrementar}>+</button>
                     </div>
                 </div>
+
+                {/* ✅ NUEVO BLOQUE: Input de texto para la Presa de Pollo */}
+                <div className="modal-notas" style={{ marginTop: '15px', textAlign: 'left' }}>
+                    <h4 style={{ marginBottom: '5px', fontSize: '1rem' }}>Instrucciones especiales:</h4>
+                    <textarea
+                        value={detalles}
+                        onChange={(e) => setDetalles(e.target.value)}
+                        placeholder="Ej: Presa: Pecho, sin ensalada..."
+                        style={{
+                            width: '100%',
+                            borderRadius: '8px',
+                            padding: '10px',
+                            border: '1px solid #ddd',
+                            fontSize: '0.9rem',
+                            minHeight: '60px',
+                            outline: 'none',
+                            fontFamily: 'inherit',
+                            boxSizing: 'border-box'
+                        }}
+                    />
+                </div>
                 
                 <button 
                     className="modal-add-button" 
                     onClick={handleAdd}
                     disabled={necesitaGuarnicion && guarnicionesDisponibles.length === 0}
+                    style={{ marginTop: '20px' }}
                 >
                     Agregar al Carrito - Bs. {total.toFixed(2)}
                 </button>

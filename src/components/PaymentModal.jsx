@@ -5,56 +5,40 @@ import './css/PaymentModal.css';
 /**
  * Modal flotante para mostrar el código QR de pago.
  */
-function PaymentModal({ isOpen, onClose, onPaymentComplete, googleSheetUrl, isSubmitting }) {
+function PaymentModal({ isOpen, onClose, onPaymentComplete, qrUrl, restaurante, isSubmitting }) {
   const QR_BACKUP = "https://i.ibb.co/b5trLpdS/QR-prueba.jpg";
   
-  const [qrUrl, setQrUrl] = useState(QR_BACKUP);
+  const [currentQrUrl, setCurrentQrUrl] = useState(QR_BACKUP);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [usingBackup, setUsingBackup] = useState(false);
 
   useEffect(() => {
-    if (isOpen && googleSheetUrl) {
-      fetchQRFromSheet();
-    } else if (isOpen && !googleSheetUrl) {
-      setUsingBackup(true);
-    }
-  }, [isOpen, googleSheetUrl]);
-
-  const fetchQRFromSheet = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const response = await fetch(googleSheetUrl, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (!response.ok) throw new Error('Error al cargar datos del Sheet');
-      const data = await response.json();
-      const qrFromSheet = data?.restaurante?.qr_url || data?.qr_url;
-      if (qrFromSheet && qrFromSheet !== '' && !qrFromSheet.includes('placeholder')) {
-        setQrUrl(qrFromSheet);
+    if (isOpen) {
+      setLoading(true);
+      // Si recibimos el qrUrl del restaurante, lo usamos
+      if (qrUrl && qrUrl !== '' && !qrUrl.includes('placeholder')) {
+        setCurrentQrUrl(qrUrl);
         setUsingBackup(false);
+        setError(null);
       } else {
-        throw new Error('QR no encontrado en Sheet');
+        // Si no hay QR específico, usamos el backup
+        setCurrentQrUrl(QR_BACKUP);
+        setUsingBackup(true);
+        setError('Usando QR de respaldo');
       }
-    } catch (err) {
-      setQrUrl(QR_BACKUP);
-      setUsingBackup(true);
-      setError('Usando QR de respaldo');
-    } finally {
       setLoading(false);
     }
-  };
+  }, [isOpen, qrUrl]);
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(qrUrl);
+      const response = await fetch(currentQrUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'codigo_qr_pago.png');
+      link.setAttribute('download', `codigo_qr_${restaurante?.nombre || 'pago'}.png`);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
@@ -85,12 +69,13 @@ function PaymentModal({ isOpen, onClose, onPaymentComplete, googleSheetUrl, isSu
               )}
 
               <div className="qr-container">
-                <img src={qrUrl} alt="QR de Pago" className="qr-image" />
+                <img src={currentQrUrl} alt="QR de Pago" className="qr-image" />
               </div>
 
               <div className="payment-info">
-                <p><strong>Banco:</strong> Banco Nacional</p>
-                <p><strong>Titular:</strong> Demo Restaurant</p>
+                {/* Ahora el titular es dinámico basado en el nombre del restaurante */}
+                <p><strong>Banco:</strong> Transferencia QR</p>
+                <p><strong>Titular:</strong> {restaurante?.nombre || 'Demo Restaurant'}</p>
                 <p className="info-note">Envía el comprobante al confirmar</p>
               </div>
 

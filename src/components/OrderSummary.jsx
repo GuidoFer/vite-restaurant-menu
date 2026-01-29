@@ -200,7 +200,7 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                             </div>
                             <div className="form-group">
                                 <label>Notas para el restaurante (opcional)</label>
-                                <textarea name="notasAdicionales" value={formData.notasAdicionales} onChange={handleInputChange} placeholder="Ej: No tocar timbre, llamar al llegar..." rows="2"></textarea>
+                                <textarea name="notasAdicionales" value={formData.notasAdicionales} onChange={handleInputChange} placeholder="Ejm. Bien cocido la carne, mas llajua, sin sopa" rows="2"></textarea>
                             </div>
                             <button className="btn-confirmar" onClick={handleConfirmarPedido}>Continuar al Pago</button>
                         </div>
@@ -217,6 +217,8 @@ const OrderSummary = ({ carrito, setCarrito, onClose, restaurante }) => {
                             onClose={() => { if(!guardandoPedido) { setMostrarPago(false); setMostrarFormulario(true); } }} 
                             onPaymentComplete={handlePagoCompletado} 
                             isSubmitting={guardandoPedido}
+                            qrUrl={restaurante.qr_url}
+                            restaurante={restaurante}
                         />
                     </>
                 )}
