@@ -49,9 +49,69 @@
     flex-direction: column;
     box-shadow: 0 6px 15px rgba(0,0,0,0.08);
     border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
-/* Barra Superior: Orden y Hash */
+/* --- ESTADO PENDIENTE DE PAGO (MEJORADO) --- */
+.admin-card.PENDIENTE_PAGO .card-content-wrapper {
+    filter: grayscale(0.3) opacity(0.8); /* Solo el contenido se vuelve gris */
+    background: #eceff1 !important;
+}
+
+.admin-card.PENDIENTE_PAGO {
+    border: 2px solid #ff4757 !important;
+}
+
+.status-banner-pago-wrapper {
+    position: relative;
+    z-index: 10; /* Por encima del filtro gris */
+}
+
+.status-banner-pago {
+    background: #ff4757;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    box-shadow: 0 2px 10px rgba(231, 76, 60, 0.4);
+}
+
+/* Animación de Palpitación */
+@keyframes pulsateBanner {
+    0% { background-color: #ff4757; transform: scale(1); }
+    50% { background-color: #ff6b81; transform: scale(1.02); }
+    100% { background-color: #ff4757; transform: scale(1); }
+}
+
+.pulsating-banner {
+    animation: pulsateBanner 1.5s ease-in-out infinite;
+}
+
+.admin-card.PENDIENTE_PAGO .card-top-admin {
+    background: #607d8b !important;
+}
+
+/* Botones de acción */
+.btn-pago-verificado {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 0 #1e8449;
+    transition: all 0.1s;
+    filter: none !important; /* Asegura que el botón no sea gris */
+}
+
+.btn-pago-verificado:active { transform: translateY(3px); box-shadow: 0 1px 0 #1e8449; }
+
+/* Resto de estilos base */
 .card-top-admin {
     display: flex;
     justify-content: space-between;
@@ -61,58 +121,24 @@
     color: white;
 }
 
-.admin-id-corto {
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: #f1c40f; /* Resalta el número de orden */
-}
-
-.admin-hash-badge {
-    background: rgba(255,255,255,0.15);
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-family: monospace;
-    font-size: 0.9rem;
-}
-
-/* Cuerpo del Pedido */
+.admin-id-corto { font-size: 1.3rem; font-weight: 800; color: #f1c40f; }
+.admin-hash-badge { background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; }
 .card-body { padding: 18px; flex-grow: 1; }
-
-.admin-fila-espaciada {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 2px solid #f1f1f1;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
-
+.admin-fila-espaciada { display: flex; justify-content: space-between; border-bottom: 2px solid #f1f1f1; padding-bottom: 10px; margin-bottom: 15px; }
 .admin-cliente { font-weight: 700; font-size: 1.1rem; color: #2d3436; }
 .admin-hora { color: #636e72; font-weight: 600; }
-
-/* Items y Detalles de Cocina */
-.item-linea-contenedor {
-    margin-bottom: 12px;
-}
-
-.item-linea {
-    display: flex;
-    justify-content: space-between;
-    font-weight: 600;
-    font-size: 1.05rem;
-}
-
+.item-linea-contenedor { margin-bottom: 12px; }
+.item-linea { display: flex; justify-content: space-between; font-weight: 600; font-size: 1.05rem; }
 .item-cant { color: #d63031; margin-right: 5px; }
 
-/* CUADRO DE DETALLES (SOPA, SEGUNDO, ETC) */
 .item-detalles-cocina {
-    background: #fff9db; /* Amarillo suave para no cansar la vista */
+    background: #fff9db;
     border-left: 4px solid #f1c40f;
     padding: 8px 12px;
     margin-top: 6px;
     border-radius: 0 8px 8px 0;
     font-size: 0.95rem;
     color: #444;
-    line-height: 1.4;
 }
 
 .admin-notas-global {
@@ -125,31 +151,13 @@
     border: 1px dashed #3498db;
 }
 
-/* Footer y Acciones */
-.card-footer-admin {
-    background: #fdfdfd;
-    padding: 15px;
-    border-top: 1px solid #eee;
-}
-
-.admin-total-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
+.card-footer-admin { background: #fdfdfd; padding: 15px; border-top: 1px solid #eee; }
+.admin-total-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .label-total { font-weight: bold; color: #636e72; }
 .admin-precio { font-size: 1.4rem; font-weight: 800; color: #2d3436; }
+.admin-acciones-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-.admin-acciones-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-/* Botones de Acción */
-.btn-whatsapp {
+.btn-whatsapp, .btn-whatsapp-small {
     background: #25d366;
     color: white;
     border: none;
@@ -159,30 +167,13 @@
     cursor: pointer;
     font-size: 0.9rem;
 }
+.btn-whatsapp-small { padding: 10px; font-size: 0.75rem; background: #128c7e; }
+.btn-estado-v2 { border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; }
 
-.btn-estado-v2 {
-    border: none;
-    padding: 14px;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s;
-}
-
-/* Estados */
 .admin-card.PENDIENTE { border-top: 6px solid #e67e22; }
 .admin-card.ENTREGADO { opacity: 0.7; filter: grayscale(0.4); border-top: 6px solid #2ecc71; }
-
 .btn-estado-v2.PENDIENTE { background: #e67e22; color: white; }
 .btn-estado-v2.ENTREGADO { background: #2ecc71; color: white; }
-
-/* Responsive */
-@media (max-width: 480px) {
-    .admin-container { padding: 10px; }
-    .admin-lista { grid-template-columns: 1fr; }
-    .admin-header h2 { font-size: 1.1rem; }
-}
 
 .banner-alarma {
     position: sticky;
@@ -192,24 +183,16 @@
     background-color: #ff0000;
     display: flex;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     animation: parpadeoRojo 1s infinite;
 }
-
-.btn-detener-alarma {
-    background-color: white;
-    color: red;
-    border: none;
-    padding: 15px 30px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    text-transform: uppercase;
-}
+.btn-detener-alarma { background-color: white; color: red; border: none; padding: 15px 30px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; cursor: pointer; }
 
 @keyframes parpadeoRojo {
     0% { background-color: #ff0000; }
     50% { background-color: #8b0000; }
     100% { background-color: #ff0000; }
+}
+
+@media (max-width: 480px) {
+    .admin-lista { grid-template-columns: 1fr; }
 }
