@@ -186,11 +186,7 @@ const MenuPage = () => {
     };
 
     const getSchedule = () => {
-        if (!data) return '';
-        const tipoServicio = data.tipo_servicio || 'almuerzo';
-        if (tipoServicio === 'almuerzo') return 'Lun-Dom: 11:00 - 15:00';
-        if (tipoServicio === 'cena') return 'Lun-Dom: 18:00 - 22:00';
-        return 'Lun-Dom: 11:00 - 15:00 y 18:00 - 22:00';
+        return data?.horario_display || 'Horario no disponible';
     };
 
     const totalItems = carrito.reduce((sum, item) => sum + (item.cantidad || 1), 0);
@@ -376,7 +372,7 @@ const MenuPage = () => {
                         </div>
                     </div>
                     <div className="border-t border-gray-700 pt-6">
-                        <p className="text-gray-400 text-sm mb-3">© 2024 {data.nombre}. Todos los derechos reservados.</p>
+                        <p className="text-gray-400 text-sm mb-3">© 2026 {data.nombre}. Todos los derechos reservados.</p>
                         <div className="flex items-center justify-center gap-2 text-gray-500 text-xs">
                             <span>Powered by</span>
                             <a href="https://wa.me/59160605127" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 font-semibold">SIA (Soluciones con IA)</a>

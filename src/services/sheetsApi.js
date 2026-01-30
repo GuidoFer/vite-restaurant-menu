@@ -26,7 +26,7 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
             throw new Error(`Restaurante '${restaurantSlug}' no encontrado en la Hoja 'Restaurantes'.`);
         }
         
-        const [rawId, nameSlug, nombre, telefono, ubicacion, qr_url, email, tipo_servicio, precio_almuerzo] = restaurantRow;
+        const [rawId, nameSlug, nombre, telefono, ubicacion, qr_url, email, tipo_servicio, horario_display] = restaurantRow;
         const id = rawId?.toString() || ''; 
 
         // ----------------------------------------------------
@@ -196,6 +196,7 @@ export async function getRestaurantData(sheetId, restaurantSlug) {
                 ubicacion, 
                 telefono, 
                 tipo_servicio, 
+                horario_display,
                 sheet_id: sheetId,
                 estado: estadoServicio // ✅ PASAMOS EL ESTADO AL RESTAURANTE
             },

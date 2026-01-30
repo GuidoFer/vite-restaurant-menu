@@ -25,7 +25,7 @@ const PlatosExtras = forwardRef(({ menuExtras, horarioActual, onAddToCart, guarn
     // Títulos según tema
     const titulo = theme === 'noche' 
         ? '🌙 Nuestro Menú - Noche' 
-        : '🍽️ Platos Extras - Medio Día';
+        : '🍽️ Platos Extras del Día';
 
     const handleOpenModal = (plato) => {
         setPlatoSeleccionado(plato);
