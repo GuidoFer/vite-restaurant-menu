@@ -19,7 +19,32 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.admin-header h2 { margin: 0; font-size: 1.4rem; letter-spacing: 1px; }
+.header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Título optimizado: Nombre de negocio grande, "PANEL" discreto */
+.admin-header h2 { 
+    margin: 0; 
+    font-size: 1.4rem; 
+    letter-spacing: 1px; 
+    color: #f1c40f;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+/* Estilo para la fecha agrandada */
+.badge-fecha {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    width: fit-content;
+}
 
 .btn-refrescar {
     background: #f1c40f;
@@ -193,6 +218,33 @@
     100% { background-color: #ff0000; }
 }
 
+/* RESPONSIVE AJUSTADO PARA CELULAR (95% DE USO) */
 @media (max-width: 480px) {
+    .admin-container { padding: 10px; }
+    
+    .admin-header {
+        padding: 10px 15px;
+        margin-bottom: 15px;
+    }
+
+    .admin-header h2 { 
+        font-size: 1.1rem; /* Nombre del negocio legible pero ajustado */
+    }
+
+    /* Reducción del texto "Panel" */
+    .admin-header h2::first-letter {
+        font-size: 0.85rem;
+        font-weight: normal;
+    }
+
+    .badge-fecha {
+        font-size: 1rem; /* Fecha más grande en relación al título */
+    }
+
+    .btn-refrescar {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+    }
+
     .admin-lista { grid-template-columns: 1fr; }
 }

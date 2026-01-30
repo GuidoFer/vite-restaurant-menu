@@ -8,6 +8,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwn10DGmEntPVk-ojtj4
 const AdminDashboard = () => {
     const { slug } = useParams(); 
     const [sheetId, setSheetId] = useState(null); 
+    const [nombreRestaurante, setNombreRestaurante] = useState(""); // Inyectado
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null); 
     
@@ -18,6 +19,31 @@ const AdminDashboard = () => {
     
     const audioRef = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2847/2847-preview.mp3'));
 
+    // --- INYECCIÓN DEL ARQUITECTO: MANEJO DEL BOTÓN ATRÁS ---
+    useEffect(() => {
+        const handleBackButton = (e) => {
+            e.preventDefault();
+            const confirmar = window.confirm("¿Seguro que desea salir del panel de pedidos?");
+            if (confirmar) {
+                // Usuario acepta salir
+                window.removeEventListener('popstate', handleBackButton);
+                window.history.back();
+            } else {
+                // Usuario cancela, volvemos a poner el estado
+                window.history.pushState(null, '', window.location.pathname);
+            }
+        };
+
+        // Agregar un estado al historial SOLO al montar
+        window.history.pushState(null, '', window.location.pathname);
+        window.addEventListener('popstate', handleBackButton);
+
+        return () => {
+            window.removeEventListener('popstate', handleBackButton);
+        };
+    }, []);
+
+    // --- RESTO DEL CÓDIGO ORIGINAL INTACTO ---
     useEffect(() => {
         async function resolverSlug() {
             try {
@@ -28,6 +54,7 @@ const AdminDashboard = () => {
                 }
                 const restaurante = await getRestaurantBySlug(slug);
                 setSheetId(restaurante.sheetId);
+                setNombreRestaurante(restaurante.nombre); // Inyectado
             } catch (err) {
                 console.error('Error:', err);
                 setError(`Restaurante "${slug}" no encontrado`);
@@ -203,7 +230,7 @@ const AdminDashboard = () => {
 
             <header className="admin-header">
                 <div className="header-info">
-                    <h2>PANEL DE PEDIDOS</h2>
+                    <h2>PANEL: {nombreRestaurante.toUpperCase()}</h2>
                     <span className="badge-fecha">{new Date().toLocaleDateString()}</span>
                 </div>
                 <button onClick={() => { 
