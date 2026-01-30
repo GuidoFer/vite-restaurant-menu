@@ -8,7 +8,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwn10DGmEntPVk-ojtj4
 const AdminDashboard = () => {
     const { slug } = useParams(); 
     const [sheetId, setSheetId] = useState(null); 
-    const [nombreRestaurante, setNombreRestaurante] = useState(""); // Inyectado
+    const [nombreRestaurante, setNombreRestaurante] = useState("");
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null); 
     
@@ -19,31 +19,22 @@ const AdminDashboard = () => {
     
     const audioRef = useRef(new Audio('https://assets.mixkit.co/active_storage/sfx/2847/2847-preview.mp3'));
 
-    // --- INYECCIÓN DEL ARQUITECTO: MANEJO DEL BOTÓN ATRÁS ---
     useEffect(() => {
         const handleBackButton = (e) => {
             e.preventDefault();
             const confirmar = window.confirm("¿Seguro que desea salir del panel de pedidos?");
             if (confirmar) {
-                // Usuario acepta salir
                 window.removeEventListener('popstate', handleBackButton);
                 window.history.back();
             } else {
-                // Usuario cancela, volvemos a poner el estado
                 window.history.pushState(null, '', window.location.pathname);
             }
         };
-
-        // Agregar un estado al historial SOLO al montar
         window.history.pushState(null, '', window.location.pathname);
         window.addEventListener('popstate', handleBackButton);
-
-        return () => {
-            window.removeEventListener('popstate', handleBackButton);
-        };
+        return () => window.removeEventListener('popstate', handleBackButton);
     }, []);
 
-    // --- RESTO DEL CÓDIGO ORIGINAL INTACTO ---
     useEffect(() => {
         async function resolverSlug() {
             try {
@@ -54,7 +45,7 @@ const AdminDashboard = () => {
                 }
                 const restaurante = await getRestaurantBySlug(slug);
                 setSheetId(restaurante.sheetId);
-                setNombreRestaurante(restaurante.nombre); // Inyectado
+                setNombreRestaurante(restaurante.nombre);
             } catch (err) {
                 console.error('Error:', err);
                 setError(`Restaurante "${slug}" no encontrado`);
@@ -120,11 +111,18 @@ const AdminDashboard = () => {
                 })
                 .filter(pedido => pedido.esDeHoy)
                 .sort((a, b) => {
-                    if (a.estado === 'PENDIENTE_PAGO' && b.estado !== 'PENDIENTE_PAGO') return 1;
-                    if (a.estado !== 'PENDIENTE_PAGO' && b.estado === 'PENDIENTE_PAGO') return -1;
-                    return 0;
-                })
-                .reverse();
+                    // 1. Prioridad por estado (ELIMINADO siempre al final)
+                    const esEliminadoA = a.estado === 'ELIMINADO' ? 1 : 0;
+                    const esEliminadoB = b.estado === 'ELIMINADO' ? 1 : 0;
+                    
+                    if (esEliminadoA !== esEliminadoB) {
+                        return esEliminadoA - esEliminadoB;
+                    }
+                    
+                    // 2. Si ambos son activos (o ambos eliminados), el más reciente arriba
+                    // Usamos nroPedido como referencia de orden cronológico
+                    return parseInt(b.nroPedido || 0) - parseInt(a.nroPedido || 0);
+                });
 
             if (!primeraCarga.current && dataFiltrada.length > cantidadAnterior) {
                 reproducirAlertaPersistente();
@@ -193,6 +191,46 @@ const AdminDashboard = () => {
         } catch (err) { obtenerPedidos(); }
     };
 
+    const eliminarPedido = async (codigo) => {
+        const confirmar = window.confirm("¿Está seguro de eliminar este pedido? Esta acción no se puede deshacer.");
+        if (!confirmar) return;
+
+        setPedidos(prev => prev.map(p => 
+            p.codigo === codigo ? { ...p, estado: 'ELIMINADO' } : p
+        ));
+        
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({ action: 'actualizarEstado', sheetId, codigo, nuevoEstado: 'ELIMINADO' })
+            });
+            setTimeout(() => obtenerPedidos(false), 2000);
+        } catch (err) { 
+            console.error("Error al eliminar:", err);
+            obtenerPedidos(); 
+        }
+    };
+
+    const restaurarPedido = async (codigo) => {
+        const confirmar = window.confirm("¿Desea restaurar este pedido a PENDIENTE DE PAGO?");
+        if (!confirmar) return;
+        setPedidos(prev => prev.map(p => 
+            p.codigo === codigo ? { ...p, estado: 'PENDIENTE_PAGO' } : p
+        ));
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({ action: 'actualizarEstado', sheetId, codigo, nuevoEstado: 'PENDIENTE_PAGO' })
+            });
+            setTimeout(() => obtenerPedidos(false), 2000);
+        } catch (err) { 
+            console.error("Error al restaurar:", err);
+            obtenerPedidos(); 
+        }
+    };
+
     const recordarPago = (pedido) => {
         const numero = pedido.celular.toString().replace(/\D/g, '');
         const mensaje = `Hola ${pedido.cliente}, recibimos tu pedido #${pedido.nroPedido || '---'}. Tu pedido está en cola, pero por favor envía el comprobante de pago por este medio para que comencemos a prepararlo. ¡Gracias!`;
@@ -230,7 +268,7 @@ const AdminDashboard = () => {
 
             <header className="admin-header">
                 <div className="header-info">
-                    <h2>PANEL: {nombreRestaurante.toUpperCase()}</h2>
+                    <h2><span className="texto-panel">PANEL:</span> {nombreRestaurante.toUpperCase()}</h2>
                     <span className="badge-fecha">{new Date().toLocaleDateString()}</span>
                 </div>
                 <button onClick={() => { 
@@ -246,12 +284,17 @@ const AdminDashboard = () => {
                     pedidos.map((pedido) => (
                         <div key={pedido.codigo} className={`admin-card ${pedido.estado}`}>
                             
-                            {/* BANNER ROJO - POSICIONADO PARA EVITAR FILTROS */}
                             {pedido.estado === 'PENDIENTE_PAGO' && (
                                 <div className="status-banner-pago-wrapper">
                                     <div className="status-banner-pago pulsating-banner">
                                         ⚠️ PENDIENTE DE PAGO
                                     </div>
+                                </div>
+                            )}
+
+                            {pedido.estado === 'ELIMINADO' && (
+                                <div className="status-banner-eliminado">
+                                    ❌ PEDIDO ELIMINADO
                                 </div>
                             )}
 
@@ -281,30 +324,42 @@ const AdminDashboard = () => {
                                         <span className="label-total">TOTAL:</span>
                                         <span className="admin-precio">Bs. {pedido.total}</span>
                                     </div>
-                                    <div className="admin-acciones-grid">
-                                        {pedido.estado === 'PENDIENTE_PAGO' ? (
-                                            <>
+
+                                    {pedido.estado === 'ELIMINADO' ? (
+                                        <div className="admin-acciones-grid" style={{ gridTemplateColumns: '1fr' }}>
+                                            <button onClick={() => restaurarPedido(pedido.codigo)} className="btn-restaurar">
+                                                ♻️ RESTAURAR PEDIDO
+                                            </button>
+                                        </div>
+                                    ) : pedido.estado === 'PENDIENTE_PAGO' ? (
+                                        <>
+                                            <div className="admin-acciones-grid" style={{ gridTemplateColumns: '1fr' }}>
                                                 <button onClick={() => confirmarPago(pedido.codigo)} className="btn-pago-verificado">
                                                     ✅ PAGO VERIFICADO
                                                 </button>
+                                            </div>
+                                            <div className="admin-acciones-grid" style={{ marginTop: '10px' }}>
                                                 <button onClick={() => recordarPago(pedido)} className="btn-whatsapp-small">
-                                                    💬 Recordar Pago
+                                                    💬 Recordar
                                                 </button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <button onClick={() => confirmarPreparacion(pedido)} className="btn-whatsapp">
-                                                    Pago OK 👍
+                                                <button onClick={() => eliminarPedido(pedido.codigo)} className="btn-eliminar">
+                                                    🗑️ Eliminar
                                                 </button>
-                                                <button 
-                                                    onClick={() => cambiarEstado(pedido.codigo, pedido.estado)} 
-                                                    className={`btn-estado-v2 ${pedido.estado}`}
-                                                >
-                                                    {pedido.estado === 'PENDIENTE' ? 'Despachar' : '✓ Entregado'}
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="admin-acciones-grid">
+                                            <button onClick={() => confirmarPreparacion(pedido)} className="btn-whatsapp">
+                                                Pago OK 👍
+                                            </button>
+                                            <button 
+                                                onClick={() => cambiarEstado(pedido.codigo, pedido.estado)} 
+                                                className={`btn-estado-v2 ${pedido.estado}`}
+                                            >
+                                                {pedido.estado === 'PENDIENTE' ? 'Despachar' : '✓ Entregado'}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

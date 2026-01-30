@@ -25,7 +25,6 @@
     gap: 5px;
 }
 
-/* Título optimizado: Nombre de negocio grande, "PANEL" discreto */
 .admin-header h2 { 
     margin: 0; 
     font-size: 1.4rem; 
@@ -35,7 +34,12 @@
     font-weight: 800;
 }
 
-/* Estilo para la fecha agrandada */
+.texto-panel {
+    color: #aaaaaa;
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+
 .badge-fecha {
     font-size: 1.1rem;
     font-weight: 700;
@@ -78,9 +82,9 @@
     position: relative;
 }
 
-/* --- ESTADO PENDIENTE DE PAGO (MEJORADO) --- */
+/* ESTADO PENDIENTE DE PAGO */
 .admin-card.PENDIENTE_PAGO .card-content-wrapper {
-    filter: grayscale(0.3) opacity(0.8); /* Solo el contenido se vuelve gris */
+    filter: grayscale(0.3) opacity(0.8);
     background: #eceff1 !important;
 }
 
@@ -90,7 +94,7 @@
 
 .status-banner-pago-wrapper {
     position: relative;
-    z-index: 10; /* Por encima del filtro gris */
+    z-index: 10;
 }
 
 .status-banner-pago {
@@ -104,7 +108,6 @@
     box-shadow: 0 2px 10px rgba(231, 76, 60, 0.4);
 }
 
-/* Animación de Palpitación */
 @keyframes pulsateBanner {
     0% { background-color: #ff4757; transform: scale(1); }
     50% { background-color: #ff6b81; transform: scale(1.02); }
@@ -119,6 +122,31 @@
     background: #607d8b !important;
 }
 
+/* ESTADO ELIMINADO */
+.admin-card.ELIMINADO {
+    opacity: 0.5;
+    filter: grayscale(1);
+    border: 2px dashed #95a5a6 !important;
+}
+
+.admin-card.ELIMINADO .card-content-wrapper {
+    background: #ecf0f1 !important;
+}
+
+.status-banner-eliminado {
+    background: #95a5a6;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.admin-card.ELIMINADO .card-top-admin {
+    background: #7f8c8d !important;
+}
+
 /* Botones de acción */
 .btn-pago-verificado {
     background: #27ae60;
@@ -131,12 +159,45 @@
     font-size: 0.85rem;
     box-shadow: 0 4px 0 #1e8449;
     transition: all 0.1s;
-    filter: none !important; /* Asegura que el botón no sea gris */
+    filter: none !important;
 }
 
-.btn-pago-verificado:active { transform: translateY(3px); box-shadow: 0 1px 0 #1e8449; }
+.btn-pago-verificado:active { 
+    transform: translateY(3px); 
+    box-shadow: 0 1px 0 #1e8449; 
+}
 
-/* Resto de estilos base */
+.btn-eliminar {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.btn-eliminar:hover { background: #c0392b; }
+.btn-eliminar:active { transform: scale(0.95); }
+
+.btn-restaurar {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-restaurar:hover { background: #2980b9; transform: translateY(-2px); }
+.btn-restaurar:active { transform: scale(0.95); }
+
+/* Estilos base de tarjetas */
 .card-top-admin {
     display: flex;
     justify-content: space-between;
@@ -193,7 +254,11 @@
     font-size: 0.9rem;
 }
 .btn-whatsapp-small { padding: 10px; font-size: 0.75rem; background: #128c7e; }
-.btn-estado-v2 { border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; }
+
+.btn-estado-v2 { 
+    border: none; padding: 14px; border-radius: 10px; font-weight: bold; 
+    cursor: pointer; font-size: 0.9rem; transition: all 0.3s; 
+}
 
 .admin-card.PENDIENTE { border-top: 6px solid #e67e22; }
 .admin-card.ENTREGADO { opacity: 0.7; filter: grayscale(0.4); border-top: 6px solid #2ecc71; }
@@ -201,50 +266,23 @@
 .btn-estado-v2.ENTREGADO { background: #2ecc71; color: white; }
 
 .banner-alarma {
-    position: sticky;
-    top: 0;
-    z-index: 9999;
-    padding: 15px;
-    background-color: #ff0000;
-    display: flex;
-    justify-content: center;
-    animation: parpadeoRojo 1s infinite;
+    position: sticky; top: 0; z-index: 9999; padding: 15px; background-color: #ff0000;
+    display: flex; justify-content: center; animation: parpadeoRojo 1s infinite;
 }
-.btn-detener-alarma { background-color: white; color: red; border: none; padding: 15px 30px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; cursor: pointer; }
-
-@keyframes parpadeoRojo {
-    0% { background-color: #ff0000; }
-    50% { background-color: #8b0000; }
-    100% { background-color: #ff0000; }
+.btn-detener-alarma { 
+    background-color: white; color: red; border: none; padding: 15px 30px; 
+    font-size: 1.2rem; font-weight: bold; border-radius: 8px; cursor: pointer; 
 }
 
-/* RESPONSIVE AJUSTADO PARA CELULAR (95% DE USO) */
+@keyframes parpadeoRojo { 0% { background-color: #ff0000; } 50% { background-color: #8b0000; } 100% { background-color: #ff0000; } }
+
+/* RESPONSIVE CELULAR */
 @media (max-width: 480px) {
     .admin-container { padding: 10px; }
-    
-    .admin-header {
-        padding: 10px 15px;
-        margin-bottom: 15px;
-    }
-
-    .admin-header h2 { 
-        font-size: 1.1rem; /* Nombre del negocio legible pero ajustado */
-    }
-
-    /* Reducción del texto "Panel" */
-    .admin-header h2::first-letter {
-        font-size: 0.85rem;
-        font-weight: normal;
-    }
-
-    .badge-fecha {
-        font-size: 1rem; /* Fecha más grande en relación al título */
-    }
-
-    .btn-refrescar {
-        padding: 8px 10px;
-        font-size: 0.75rem;
-    }
-
+    .admin-header { padding: 10px 15px; margin-bottom: 15px; flex-direction: row; justify-content: space-between; }
+    .admin-header h2 { font-size: 1.1rem; display: flex; flex-direction: column; line-height: 1.1; }
+    .texto-panel { font-size: 0.65rem; font-weight: 400; color: #aaaaaa; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+    .badge-fecha { font-size: 1.1rem; font-weight: 700; color: #ffffff; background: rgba(255, 255, 255, 0.1); padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+    .btn-refrescar { padding: 8px 10px; font-size: 0.75rem; max-width: 100px; line-height: 1.2; }
     .admin-lista { grid-template-columns: 1fr; }
 }
