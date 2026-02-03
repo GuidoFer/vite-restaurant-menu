@@ -268,7 +268,7 @@ const MenuPage = () => {
                 {/* ✅ BANNER DE ESTADO DINÁMICO */}
                 {estaBloqueado && (
                     <div className={`mb-6 p-4 rounded-2xl flex items-center gap-4 text-white shadow-xl animate-bounce-subtle ${
-                        estadoServicio === 'PAUSADO' ? 'bg-orange-500' : 'bg-red-600'
+                        estadoServicio === 'PAUSADO' ? 'bg-yellow-500' : 'bg-red-600'
                     }`}>
                         <AlertTriangle className="w-10 h-10 flex-shrink-0" />
                         <div>
