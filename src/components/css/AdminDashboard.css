@@ -330,3 +330,64 @@
 .btn-whatsapp-header:active {
     transform: scale(0.95);
 }
+
+@media (max-width: 480px) {
+    .admin-container { padding: 10px; }
+    
+    .admin-header {
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        flex-direction: column; /* ✅ CAMBIO: Stack vertical en móvil */
+        gap: 10px;
+    }
+
+    .admin-header h2 { 
+        font-size: 1.1rem;
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+    }
+
+    .texto-panel {
+        font-size: 0.65rem;
+        font-weight: 400;
+        color: #aaaaaa;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+
+    .badge-fecha {
+        font-size: 1.1rem; 
+        font-weight: 700;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-top: 5px;
+    }
+
+    /* ✅ NUEVOS ESTILOS: Tamaños proporcionales en móvil */
+    .btn-refrescar {
+        flex: 2; /* El más grande */
+        padding: 12px 10px;
+        font-size: 0.85rem;
+    }
+
+    .btn-whatsapp-header {
+        flex: 1.5; /* Mediano */
+        padding: 12px 10px;
+        font-size: 0.85rem;
+    }
+
+    .btn-abrir-sheet {
+        flex: 1; /* El más pequeño */
+        padding: 10px 8px;
+        font-size: 0.75rem;
+    }
+
+    .admin-lista { 
+        grid-template-columns: 1fr; 
+    }
+}
