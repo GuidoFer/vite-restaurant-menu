@@ -308,3 +308,25 @@
 .btn-abrir-sheet:active {
     transform: scale(0.95);
 }
+
+/* Botón WhatsApp en Header */
+.btn-whatsapp-header {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-whatsapp-header:hover {
+    background: #128C7E;
+    transform: translateY(-2px);
+}
+
+.btn-whatsapp-header:active {
+    transform: scale(0.95);
+}

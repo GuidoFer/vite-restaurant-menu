@@ -9,6 +9,7 @@ const AdminDashboard = () => {
     const { slug } = useParams(); 
     const [sheetId, setSheetId] = useState(null); 
     const [nombreRestaurante, setNombreRestaurante] = useState("");
+    const [telefonoRestaurante, setTelefonoRestaurante] = useState(""); // ✅ NUEVO
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null); 
     
@@ -46,6 +47,7 @@ const AdminDashboard = () => {
                 const restaurante = await getRestaurantBySlug(slug);
                 setSheetId(restaurante.sheetId);
                 setNombreRestaurante(restaurante.nombre);
+                setTelefonoRestaurante(restaurante.telefono); // ✅ NUEVO
             } catch (err) {
                 console.error('Error:', err);
                 setError(`Restaurante "${slug}" no encontrado`);
@@ -269,13 +271,20 @@ const AdminDashboard = () => {
                     <span className="badge-fecha">{new Date().toLocaleDateString()}</span>
                 </div>
                 
-                {/* ✅ MODIFICACIÓN: Botones agrupados */}
+                {/* ✅ BOTONES DEL HEADER */}
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button 
+                        onClick={() => window.open(`https://wa.me/591${telefonoRestaurante}`, '_blank')} 
+                        className="btn-whatsapp-header"
+                    >
+                        💬 WhatsApp
+                    </button>
+                    
                     <button 
                         onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${sheetId}`, '_blank')} 
                         className="btn-abrir-sheet"
                     >
-                        📊 Abrir Panel
+                        📊 Panel
                     </button>
                     
                     <button onClick={() => { 
