@@ -111,7 +111,6 @@ const AdminDashboard = () => {
                 })
                 .filter(pedido => pedido.esDeHoy)
                 .sort((a, b) => {
-                    // 1. Prioridad por estado (ELIMINADO siempre al final)
                     const esEliminadoA = a.estado === 'ELIMINADO' ? 1 : 0;
                     const esEliminadoB = b.estado === 'ELIMINADO' ? 1 : 0;
                     
@@ -119,8 +118,6 @@ const AdminDashboard = () => {
                         return esEliminadoA - esEliminadoB;
                     }
                     
-                    // 2. Si ambos son activos (o ambos eliminados), el más reciente arriba
-                    // Usamos nroPedido como referencia de orden cronológico
                     return parseInt(b.nroPedido || 0) - parseInt(a.nroPedido || 0);
                 });
 
@@ -271,10 +268,23 @@ const AdminDashboard = () => {
                     <h2><span className="texto-panel">PANEL:</span> {nombreRestaurante.toUpperCase()}</h2>
                     <span className="badge-fecha">{new Date().toLocaleDateString()}</span>
                 </div>
-                <button onClick={() => { 
-                    audioRef.current.play().then(() => { audioRef.current.pause(); audioRef.current.currentTime = 0; }).catch(e => {});
-                    detenerAlarma(); obtenerPedidos(); 
-                }} className="btn-refrescar">🔄 Actualizar y Activar Sonido</button>
+                
+                {/* ✅ MODIFICACIÓN: Botones agrupados */}
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button 
+                        onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${sheetId}`, '_blank')} 
+                        className="btn-abrir-sheet"
+                    >
+                        📊 Abrir Panel
+                    </button>
+                    
+                    <button onClick={() => { 
+                        audioRef.current.play().then(() => { audioRef.current.pause(); audioRef.current.currentTime = 0; }).catch(e => {});
+                        detenerAlarma(); obtenerPedidos(); 
+                    }} className="btn-refrescar">
+                        🔄 Actualizar
+                    </button>
+                </div>
             </header>
 
             <div className="admin-lista">
